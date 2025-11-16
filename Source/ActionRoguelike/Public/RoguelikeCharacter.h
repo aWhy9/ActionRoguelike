@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class URInteractionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -28,6 +29,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(VisibleAnywhere)
+	URInteractionComponent* InteractionComponent;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -40,6 +44,8 @@ protected:
 	void PrimaryAttack();
 
 	void Jump();
+
+	void PrimaryInteract();
 
 public:	
 	// Called every frame

@@ -3,6 +3,7 @@
 
 #include "RoguelikeCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "RInteractionComponent.h"
 #include "RLMagicProjectile.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,8 +22,11 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
-
+	
+	InteractionComponent = CreateDefaultSubobject<URInteractionComponent>("InteractionComponent");
+	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	
 	bUseControllerRotationYaw = false;
 }
 
@@ -69,6 +73,8 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARoguelikeCharacter::PrimaryAttack);
 	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARoguelikeCharacter::Jump);
+
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
 }
 
 
@@ -114,4 +120,9 @@ void ARoguelikeCharacter::PrimaryAttack()
 void ARoguelikeCharacter::Jump()
 {
 	Super::Jump();	
+}
+
+void ARoguelikeCharacter::PrimaryInteract()
+{
+	InteractionComponent->PrimaryInteract();
 }
