@@ -23,17 +23,18 @@ public:
 	// Sets default values for this actor's properties
 	ARTreasureChest();
 
+	UFUNCTION(BlueprintCallable)
 	void Interact_Implementation(APawn* InstigatorPawn);
 	
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* BaseMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* LidMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Animation")
 	bool bIsOpen;
 	
 	

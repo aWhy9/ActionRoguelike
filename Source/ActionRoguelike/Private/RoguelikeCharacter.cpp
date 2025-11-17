@@ -72,7 +72,7 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARoguelikeCharacter::PrimaryAttack);
 	
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARoguelikeCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
 }
@@ -105,21 +105,25 @@ void ARoguelikeCharacter::MoveRight(float Value)
 void ARoguelikeCharacter::PrimaryAttack()
 {
 
+	PlayAnimMontage(AttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ARoguelikeCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+	//GetWorldTimerManager().ClearTimer(TimerHandle_PrimaryAttack);	
+}
+void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
+{
+
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	
 	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
 	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+	SpawnParams.Instigator = this;
 	
 	//Spawn Transform Matrix, transform is just a struct that has location, rotation and scale
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
-}
-
-void ARoguelikeCharacter::Jump()
-{
-	Super::Jump();	
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);	
 }
 
 void ARoguelikeCharacter::PrimaryInteract()

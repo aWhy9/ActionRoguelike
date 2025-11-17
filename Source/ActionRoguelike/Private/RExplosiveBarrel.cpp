@@ -14,23 +14,20 @@ ARExplosiveBarrel::ARExplosiveBarrel()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SceneComponent = CreateDefaultSubobject<USceneComponent>("SceneComponent");
-	RootComponent = SceneComponent;
-	
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-	StaticMeshComponent->SetupAttachment(RootComponent);
-
-	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-	SphereComponent->SetupAttachment(RootComponent);
-
+	StaticMeshComponent->SetSimulatePhysics(true);
+	RootComponent = StaticMeshComponent;
+	
 	RadialForceComponent = CreateDefaultSubobject<URadialForceComponent>("RadialForceComponent");
 	RadialForceComponent->SetupAttachment(RootComponent);
 	
 	RadialForceComponent->Radius = 500.0f;
-	RadialForceComponent->ImpulseStrength = 3000.0f;
+	RadialForceComponent->ImpulseStrength = 2500.0f;
 	RadialForceComponent->bImpulseVelChange = true;
 	RadialForceComponent->bAutoActivate =  false;
-	RadialForceComponent->bIgnoreOwningActor = true;
+	RadialForceComponent->bIgnoreOwningActor = false;
+	RadialForceComponent->AddCollisionChannelToAffect(ECC_WorldDynamic);
+
 }
 
 // Called when the game starts or when spawned
@@ -38,8 +35,15 @@ void ARExplosiveBarrel::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//SphereComponent->OnComponentHit.AddDynamic(this, &ARExplosiveBarrel::Explode(ImpulseRadius));
+
 	
+}
+
+void ARExplosiveBarrel::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	StaticMeshComponent->OnComponentHit.AddDynamic(this, &ARExplosiveBarrel::OnActorHit);	
 }
 
 void ARExplosiveBarrel::Explode()
@@ -47,6 +51,14 @@ void ARExplosiveBarrel::Explode()
 	RadialForceComponent->FireImpulse();
 
 }
+void ARExplosiveBarrel::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Explode();
+	
+}
+
+
 
 // Called every frame
 void ARExplosiveBarrel::Tick(float DeltaTime)

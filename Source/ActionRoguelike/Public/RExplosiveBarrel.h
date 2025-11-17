@@ -6,9 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "RExplosiveBarrel.generated.h"
 
-class USphereComponent;
 class UStaticMeshComponent;
-class USceneComponent;
 class URadialForceComponent;
 
 UCLASS()
@@ -22,29 +20,27 @@ public:
 
 
 protected:
-
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* SceneComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* StaticMeshComponent;
 	
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* SphereComponent;
-
-	UPROPERTY(VisibleAnywhere)
 	URadialForceComponent* RadialForceComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ImpulseRadius;
-
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
 	UFUNCTION(BlueprintCallable)
 	void Explode();
+
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
