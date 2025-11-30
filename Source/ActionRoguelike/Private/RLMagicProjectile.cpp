@@ -4,6 +4,8 @@
 #include "RLMagicProjectile.h"
 
 #include "NiagaraComponent.h"
+#include "RLAttributeComponent.h"
+#include "RoguelikeCharacter.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -15,6 +17,7 @@ ARLMagicProjectile::ARLMagicProjectile()
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
 	SphereComponent->SetCollisionProfileName("Projectile");
+	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ARLMagicProjectile::OnActorOverlap);
 	RootComponent = SphereComponent;
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("EffectComponent");
@@ -25,6 +28,21 @@ ARLMagicProjectile::ARLMagicProjectile()
 	MovementComponent->bRotationFollowsVelocity = true;
 	MovementComponent->bInitialVelocityInLocalSpace = true;
 	
+}
+
+
+void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,	bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		URLAttributeComponent* AttributeComponent = Cast<URLAttributeComponent>(OtherActor->GetComponentByClass(URLAttributeComponent::StaticClass()));
+		if (AttributeComponent)
+			{
+				AttributeComponent->ApplyHealthChange(-20.0f);
+
+				Destroy();
+			}
+	}
 }
 
 // Called when the game starts or when spawned

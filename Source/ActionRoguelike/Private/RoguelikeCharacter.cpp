@@ -4,6 +4,7 @@
 #include "RoguelikeCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "RInteractionComponent.h"
+#include "RLAttributeComponent.h"
 #include "RLMagicProjectile.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -24,6 +25,8 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
 	InteractionComponent = CreateDefaultSubobject<URInteractionComponent>("InteractionComponent");
+	
+	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("AttributeComponent");
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
@@ -113,17 +116,35 @@ void ARoguelikeCharacter::PrimaryAttack()
 }
 void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 {
+	if (ensure(ProjectileClass))
+	{
+		FVector CameraLocation = CameraComponent->GetComponentLocation();
+		FRotator CameraRotation = CameraComponent->GetComponentRotation();
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);		
 
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		//Handle aiming of projectile
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+		//DEBUG TRACER to check if camera aim is working
+		TArray<FHitResult> Hits;	
+		FColor LineColor =  FColor::Red;
 	
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+		DrawDebugLine(GetWorld(), HandLocation, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);	
+		//DEBUG TRACER END
 	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
+		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
 	
-	//Spawn Transform Matrix, transform is just a struct that has location, rotation and scale
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);	
+		//Spawn Transform Matrix, transform is just a struct that has location, rotation and scale
+		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;	
+	
+		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);	
+	}
+	
+	
 }
 
 void ARoguelikeCharacter::PrimaryInteract()

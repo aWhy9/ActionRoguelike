@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class URInteractionComponent;
 class UAnimMontage;
+class URLAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -28,9 +29,12 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	URInteractionComponent* InteractionComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	URLAttributeComponent* AttributeComponent;
+	
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileClass;
 	
