@@ -6,6 +6,7 @@
 #include "RInteractionComponent.h"
 #include "RLAttributeComponent.h"
 #include "RLMagicProjectile.h"
+#include "RLProjectileBase.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -78,6 +79,10 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
+
+	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &ARoguelikeCharacter::BlackHoleAttack);
+
+	PlayerInputComponent->BindAction("TeleportAbility", IE_Pressed, this, &ARoguelikeCharacter::TeleportAbility);
 }
 
 
@@ -105,6 +110,52 @@ void ARoguelikeCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);	
 }
 
+void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
+{
+	if (ensureAlways(ClassToSpawn))
+	{
+		// Handle aiming of projectile
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		FCollisionShape Shape;
+		Shape.SetSphere(20.0f);
+
+		// Ignore Player
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+
+		FCollisionObjectQueryParams ObjectQueryParams;
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+		ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+
+		FVector TraceStart = CameraComponent->GetComponentLocation();
+
+		// Endpoint far into the look-at distance (not too far, still adjust somewhat towwards crosshair on miss)
+		FVector TraceEnd = CameraComponent->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+
+		FHitResult Hit;
+		// returns true if we got a blocking hit
+		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectQueryParams, Shape, CollisionParams))
+		{
+
+			// Overwrite trace end with impact point in world
+			TraceEnd = Hit.ImpactPoint;
+		}
+
+		// fnd new direction/rotation from hand pointing to impact point in world
+		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+
+		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+	}
+	
+}
+
 void ARoguelikeCharacter::PrimaryAttack()
 {
 
@@ -116,33 +167,7 @@ void ARoguelikeCharacter::PrimaryAttack()
 }
 void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 {
-	if (ensure(ProjectileClass))
-	{
-		FVector CameraLocation = CameraComponent->GetComponentLocation();
-		FRotator CameraRotation = CameraComponent->GetComponentRotation();
-		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);		
-
-		//Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-
-		//DEBUG TRACER to check if camera aim is working
-		TArray<FHitResult> Hits;	
-		FColor LineColor =  FColor::Red;
-	
-		DrawDebugLine(GetWorld(), HandLocation, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);	
-		//DEBUG TRACER END
-	
-		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
-	
-		//Spawn Transform Matrix, transform is just a struct that has location, rotation and scale
-		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;	
-	
-		GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);	
-	}
+	SpawnProjectile(ProjectileClass);
 	
 	
 }
@@ -150,4 +175,69 @@ void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 void ARoguelikeCharacter::PrimaryInteract()
 {
 	InteractionComponent->PrimaryInteract();
+}
+
+void ARoguelikeCharacter::BlackHoleAttack()
+{
+	PlayAnimMontage(AttackAnim);
+	
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ARoguelikeCharacter::BlackHoleAttack_TimeElapsed, 0.2f);	
+	
+}
+
+void ARoguelikeCharacter::BlackHoleAttack_TimeElapsed()
+{
+	if (BlackHoleClass)
+	{
+		FVector CameraLocation = CameraComponent->GetComponentLocation();
+		FRotator CameraRotation = CameraComponent->GetComponentRotation();
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
+	
+		//Handle aiming of projectile
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
+	
+		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
+	
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;	
+	
+		GetWorld()->SpawnActor<AActor>(BlackHoleClass, SpawnTM, SpawnParams);
+
+
+		
+	}
+	
+}
+
+void ARoguelikeCharacter::TeleportAbility()
+{
+
+	PlayAnimMontage(AttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_TeleportAbility, this, &ARoguelikeCharacter::TeleportAbility_TimeElapsed, 0.2f);	
+}
+
+void ARoguelikeCharacter::TeleportAbility_TimeElapsed()
+{
+	if (TeleportProjectileClass)
+	{
+		FVector CameraLocation = CameraComponent->GetComponentLocation();
+		FRotator CameraRotation = CameraComponent->GetComponentRotation();
+		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
+	
+		//Handle aiming of projectile
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
+	
+		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
+	
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;	
+	
+		GetWorld()->SpawnActor<AActor>(TeleportProjectileClass, SpawnTM, SpawnParams);
+	}
+	
 }

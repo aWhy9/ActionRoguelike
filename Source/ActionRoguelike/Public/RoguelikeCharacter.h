@@ -37,11 +37,28 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> BlackHoleClass;
+
+	UPROPERTY(EditAnywhere, Category ="Attack")
+	TSubclassOf<AActor> TeleportProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category ="Attack")
+	TSubclassOf<AActor> TeleportExplosionClass;
 	
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;
 
 	FTimerHandle TimerHandle_PrimaryAttack;
+
+	FTimerHandle TimerHandle_BlackHoleAttack;
+
+	FTimerHandle TimerHandle_TeleportAbility;
+
+	FTimerHandle TimerHandle_TeleportAbilityEnd;
+
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -51,11 +68,21 @@ protected:
 	
 	void MoveRight(float Value);
 
+	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
+
 	void PrimaryAttack();
 
 	void PrimaryAttack_TimeElapsed();
 	
 	void PrimaryInteract();
+
+	void BlackHoleAttack();
+
+	void BlackHoleAttack_TimeElapsed();
+
+	void TeleportAbility();
+
+	void TeleportAbility_TimeElapsed();
 
 public:	
 	// Called every frame

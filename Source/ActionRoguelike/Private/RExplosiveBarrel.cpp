@@ -22,7 +22,7 @@ ARExplosiveBarrel::ARExplosiveBarrel()
 	RadialForceComponent->SetupAttachment(RootComponent);
 	
 	RadialForceComponent->Radius = 500.0f;
-	RadialForceComponent->ImpulseStrength = 2500.0f;
+	RadialForceComponent->ImpulseStrength = 1500.0f;
 	RadialForceComponent->bImpulseVelChange = true;
 	RadialForceComponent->bAutoActivate =  false;
 	RadialForceComponent->bIgnoreOwningActor = false;
