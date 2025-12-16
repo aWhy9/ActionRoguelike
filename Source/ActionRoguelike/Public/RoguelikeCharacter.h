@@ -11,6 +11,7 @@ class UCameraComponent;
 class URInteractionComponent;
 class UAnimMontage;
 class URLAttributeComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -37,6 +38,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UNiagaraSystem* CastingVFX;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> BlackHoleClass;
@@ -83,6 +87,11 @@ protected:
 	void TeleportAbility();
 
 	void TeleportAbility_TimeElapsed();
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent, float NewHealth, float Delta);
+
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame

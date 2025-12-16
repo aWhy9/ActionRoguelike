@@ -3,6 +3,7 @@
 
 #include "RoguelikeCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
 #include "RInteractionComponent.h"
 #include "RLAttributeComponent.h"
 #include "RLMagicProjectile.h"
@@ -33,6 +34,14 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	
 	bUseControllerRotationYaw = false;
 }
+
+void ARoguelikeCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AttributeComponent->OnHealthChanged.AddDynamic(this, &ARoguelikeCharacter::OnHealthChanged);
+}
+
 
 // Called when the game starts or when spawned
 void ARoguelikeCharacter::BeginPlay()
@@ -116,6 +125,25 @@ void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 	{
 		// Handle aiming of projectile
 		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+		// Play a particle effect on hand
+		UNiagaraFunctionLibrary::SpawnSystemAttached(CastingVFX, GetMesh(),"Muzzle_01",  FVector::ZeroVector,  FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
+
+
+		/////////////////// DEBUG FOR TESTING
+		FString Msg = FString::Printf(TEXT("VFX: %p"), CastingVFX);
+		
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,             // Key (-1 = new message every time)
+				5.0f,           // Duration (seconds)
+				FColor::Green,  // Text color
+				Msg
+			);
+		}
+		////////////////////////// DEBUG
+
 		
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -241,3 +269,14 @@ void ARoguelikeCharacter::TeleportAbility_TimeElapsed()
 	}
 	
 }
+
+void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent,
+	float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
+}
+

@@ -17,6 +17,9 @@ public:
 	// Sets default values for this component's properties
 	URLAttributeComponent();
 
+	UFUNCTION(BlueprintCallable)
+	bool IsAlive() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
 	float Health;
@@ -31,5 +34,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(float Delta);
+
+	
 
 };

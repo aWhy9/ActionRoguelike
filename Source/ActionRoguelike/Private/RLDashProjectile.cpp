@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ARLDashProjectile::ARLDashProjectile()
 {	
@@ -23,14 +24,17 @@ void ARLDashProjectile::BeginPlay()
 
 }
 
-
+//_implementation needed for code but is the same as Explode, an unreal caveat
 void ARLDashProjectile::Explode_Implementation()
 {
 	// Clear timer if the Explode was already called through another source like OnActorHit
 	GetWorldTimerManager().ClearTimer(TimeHandle_DelayedDetonate);
 
+	// Play effect and sound upon detonation
+	
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
-
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, GetActorLocation(), GetActorRotation());
+	
 	EffectComponent->DeactivateImmediate();
 
 	MovementComponent->StopMovementImmediately();

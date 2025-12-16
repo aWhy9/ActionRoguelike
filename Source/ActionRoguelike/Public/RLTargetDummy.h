@@ -20,7 +20,7 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	URLAttributeComponent* AttributeComponent;
 
 	UPROPERTY(VisibleAnywhere)

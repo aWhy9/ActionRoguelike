@@ -9,6 +9,10 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UNiagaraComponent;
+class UNiagaraSystem;
+class UAudioComponent;
+class USoundBase;
+class UCameraShakeBase;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLMagicProjectile : public AActor
@@ -30,11 +34,35 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNiagaraComponent* NiagaraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* ImpactSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UNiagaraSystem* ImpactVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> CameraShake;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float Damage;
 	
 protected:
 
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+	void ProjectileImapct();
+
+	UFUNCTION (BlueprintCallable, Category="Camera",Meta=(WorldContext="WorldContextObject", UnsafeDuringActorConstruction="true"))
+	static void PlayWorldCameraShake(const UObject * WorldContextObject, TSubclassOf <class UCameraShakeBase> Shake,	FVector Epicenter, float InnerRadius, float OuterRadius, float Falloff, bool bOrientShakeTowardsEpicenter);
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

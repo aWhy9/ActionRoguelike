@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+class UNiagaraSystem;
+
 UCLASS()
 class ACTIONROGUELIKE_API ARLDashProjectile : public ARLProjectileBase
 {
@@ -21,6 +24,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Teleport")
 	float DetonateDelay;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* ImpactSound;
 
 	// Handle to cancel timer if we already hit something
 	FTimerHandle TimeHandle_DelayedDetonate;
