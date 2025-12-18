@@ -18,12 +18,11 @@ class ACTIONROGUELIKE_API ARLHealthPotion : public ARLPowerUp
 
 public:
 
-ARLHealthPotion();
+	ARLHealthPotion();
 
-UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-float HealAmount;	
-
-UFUNCTION(BlueprintCallable)
-void Heal();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float HealAmount;	
 	
+	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+		
 };

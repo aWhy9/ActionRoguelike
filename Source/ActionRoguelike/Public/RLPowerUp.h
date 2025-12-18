@@ -9,6 +9,8 @@
 
 class UStaticMeshComponent;
 class USphereComponent;
+class UNiagaraSystem;
+class USoundBase;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLPowerUp : public AActor, public IRGameplayInterface
@@ -29,27 +31,37 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UNiagaraSystem* InteractVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundBase* InteractSound;
+	
 	UPROPERTY(VisibleAnywhere)
 	bool bIsActorHidden;
 
 	UPROPERTY(VisibleAnywhere)
+	bool bCanInteract;
+
+	UPROPERTY(VisibleAnywhere)
 	float RespawnTimerDelay;
+
+public:
 	
 	UFUNCTION(BlueprintCallable)
-	void Interact_Implementation(APawn* InstigatorPawn);
+	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ShowActor();
+	void ToggleActorVisibility();
 
 	void Respawn();
-	
+
+	// Called every frame	
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

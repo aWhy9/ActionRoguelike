@@ -25,3 +25,13 @@ bool URLAttributeComponent::ApplyHealthChange(float Delta)
 	return true;
 }
 
+float URLAttributeComponent::GetHealth() const
+{
+	return Health;
+}
+
+float URLAttributeComponent::GetMaxHealth() const
+{
+	return MaxHealth;
+}
+

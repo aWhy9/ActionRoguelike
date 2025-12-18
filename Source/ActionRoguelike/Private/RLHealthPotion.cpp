@@ -2,9 +2,9 @@
 
 
 #include "RLHealthPotion.h"
-
-
-
+#include "RLAttributeComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ARLHealthPotion::ARLHealthPotion()
@@ -14,16 +14,27 @@ ARLHealthPotion::ARLHealthPotion()
 
 }
 
-void ARLHealthPotion::Heal()
+void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
-	//if (HitActor)
-	//{
-	//	if (HitActor->Implements<URGameplayInterface>())
-	//	{
-	//		APawn* MyPawn = Cast<APawn>(MyOwner);
-	//		
-	//		IRGameplayInterface::Execute_Interact(HitActor, MyPawn);
-	//		break;
-	//	}
-	//}
+	
+	if (InstigatorPawn)
+	{
+		if (URLAttributeComponent* AttributeComponent = InstigatorPawn->FindComponentByClass<URLAttributeComponent>())
+		{
+			if (AttributeComponent->GetHealth() < AttributeComponent->GetMaxHealth())
+			{
+				bCanInteract = true;				
+			}
+			else
+			{
+				bCanInteract = false;
+				return;
+			}
+			Super::Interact_Implementation(InstigatorPawn);
+			AttributeComponent->ApplyHealthChange(HealAmount);			
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractVFX, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());	
+		}
+	}	
 }
+

@@ -17,24 +17,30 @@ public:
 	// Sets default values for this component's properties
 	URLAttributeComponent();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
+	
+public:
+	
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyHealthChange(float Delta);
 
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth() const;
+
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
 	float Health;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
 	float MaxHealth;
-	
-public:
 
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
-	
-	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float Delta);
-
-	
 
 };

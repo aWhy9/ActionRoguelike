@@ -3,7 +3,10 @@
 
 #include "RLPowerUp.h"
 
+#include "NiagaraFunctionLibrary.h"
+#include "RLAttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ARLPowerUp::ARLPowerUp()
@@ -19,7 +22,7 @@ ARLPowerUp::ARLPowerUp()
 
 	bIsActorHidden = false;
 
-	RespawnTimerDelay = 5.0f;
+	RespawnTimerDelay = 2.0f;
 
 }
 
@@ -28,7 +31,7 @@ void ARLPowerUp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ARLPowerUp::Respawn, RespawnTimerDelay);
+	
 }
 
 // Called every frame
@@ -38,39 +41,43 @@ void ARLPowerUp::Tick(float DeltaTime)
 
 }
 
+// Implementation of this actor's interact function from InteractionComponent
 void ARLPowerUp::Interact_Implementation(APawn* InstigatorPawn)
 {
-	IRGameplayInterface::Interact_Implementation(InstigatorPawn);
-
-	ShowActor();
+	if (bCanInteract)
+	{
+		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ARLPowerUp::Respawn, RespawnTimerDelay);
 	
+		ToggleActorVisibility();
+	}
+	
+	//IRGameplayInterface::Interact_Implementation(InstigatorPawn);
 }
 
-void ARLPowerUp::ShowActor()
+// Toggles Actor visibility and collision
+void ARLPowerUp::ToggleActorVisibility()
 {
 	if (!bIsActorHidden)
 	{
-		SetActorHiddenInGame(true);
 		bIsActorHidden = true;
-		//SetActorEnableCollision(false);
+		SetActorHiddenInGame(true);		
+		SetActorEnableCollision(false);
 		
 	}
 	else
 	{
-		SetActorHiddenInGame(false);
 		bIsActorHidden = false;
-		//SetActorEnableCollision(true);
+		SetActorHiddenInGame(false);		
+		SetActorEnableCollision(true);
 		
 	}
 	
 }
 
-
-//Currently only respawns once, need to fix these functions sets to make it work properly
+// Handles "respawning" / toggles visibility of the actor via the TimerHandle 
 void ARLPowerUp::Respawn()
 {
-	//GetWorldTimerManager().
-	ShowActor();
+	GetWorldTimerManager().ClearTimer(RespawnTimerHandle);
+	ToggleActorVisibility();
 }
-
 
