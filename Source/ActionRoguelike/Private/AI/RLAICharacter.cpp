@@ -2,26 +2,41 @@
 
 
 #include "AI/RLAICharacter.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/PawnSensingComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ARLAICharacter::ARLAICharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComponent");
 }
 
-// Called when the game starts or when spawned
-void ARLAICharacter::BeginPlay()
+void ARLAICharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+
+	Super::PostInitializeComponents();
 	
+	PawnSensingComponent->OnSeePawn.AddDynamic(this, &ARLAICharacter::OnPawnSeen);
 }
 
-// Called every frame
-void ARLAICharacter::Tick(float DeltaTime)
+void ARLAICharacter::OnPawnSeen(APawn* Pawn)
 {
-	Super::Tick(DeltaTime);
-
+	AAIController* AIC = Cast<AAIController>(GetController());
+	if (AIC)
+	{
+		
+		UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
+		if (ensureMsgf(BBComp, TEXT("No Blackboard Component, please ensure BB and Behavior Tree is set.")))
+		{
+			BBComp->SetValueAsObject("TargetActor", Pawn);
+			DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::Magenta, 4.0f, true);
+		}
+		else
+		{
+			DrawDebugString(GetWorld(), GetActorLocation(), "NO BLACKBOARD COMPONENT, I DON'T KNOW WHAT TO DO.", nullptr, FColor::Red, 4.0f, true);
+		}
+	}
 }
 

@@ -14,14 +14,15 @@ class ACTIONROGUELIKE_API ARLHealthPotion : public ARLPowerUp
 {
 	GENERATED_BODY()
 	
-
-
+protected:
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float HealAmount;	
+	
 public:
 
 	ARLHealthPotion();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float HealAmount;	
 	
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 		

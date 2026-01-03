@@ -37,6 +37,8 @@ void ARLDashProjectile::Explode_Implementation()
 	
 	EffectComponent->DeactivateImmediate();
 
+	// Disable collision and cease movement on start
+	
 	MovementComponent->StopMovementImmediately();
 	SetActorEnableCollision(false);
 	

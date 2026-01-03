@@ -16,14 +16,16 @@ UCLASS()
 class ACTIONROGUELIKE_API ARLPowerUp : public AActor, public IRGameplayInterface
 {
 	GENERATED_BODY()
+	
+protected:
 
-private:
+	
+protected:	
+	// Sets default values for this actor's properties
+	
 
 	FTimerHandle RespawnTimerHandle;
 	
-public:	
-	// Sets default values for this actor's properties
-	ARLPowerUp();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMesh;	
@@ -46,7 +48,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	float RespawnTimerDelay;
 
-public:
+protected:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
@@ -56,8 +58,10 @@ public:
 
 	void Respawn();
 
-	// Called every frame	
-	virtual void Tick(float DeltaTime) override;
+	
+public:
+
+	ARLPowerUp();	
 
 protected:
 	// Called when the game starts or when spawned

@@ -16,25 +16,29 @@ ARLHealthPotion::ARLHealthPotion()
 
 void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
-	
-	if (InstigatorPawn)
+
+	if (!ensure(InstigatorPawn))
 	{
-		if (URLAttributeComponent* AttributeComponent = InstigatorPawn->FindComponentByClass<URLAttributeComponent>())
+		return;
+	}
+	
+	
+	if (URLAttributeComponent* AttributeComponent = InstigatorPawn->FindComponentByClass<URLAttributeComponent>())
+	{
+		// Check if already at max health
+		if (AttributeComponent->GetHealth() < AttributeComponent->GetMaxHealth())
 		{
-			if (AttributeComponent->GetHealth() < AttributeComponent->GetMaxHealth())
-			{
-				bCanInteract = true;				
-			}
-			else
-			{
-				bCanInteract = false;
-				return;
-			}
-			Super::Interact_Implementation(InstigatorPawn);
-			AttributeComponent->ApplyHealthChange(HealAmount);			
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractVFX, GetActorLocation());
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());	
+			bCanInteract = true;				
 		}
-	}	
+		else
+		{
+			bCanInteract = false;return;
+		}
+		Super::Interact_Implementation(InstigatorPawn);
+		AttributeComponent->ApplyHealthChange(HealAmount);			
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractVFX, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());	
+	}
+		
 }
 

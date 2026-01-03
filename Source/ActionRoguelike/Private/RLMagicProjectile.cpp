@@ -29,7 +29,7 @@ ARLMagicProjectile::ARLMagicProjectile()
 	NiagaraComponent->SetupAttachment(SphereComponent);
 
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
-	MovementComponent->InitialSpeed = 1000.0f;
+	MovementComponent->InitialSpeed = 2000.0f;
 	MovementComponent->bRotationFollowsVelocity = true;
 	MovementComponent->bInitialVelocityInLocalSpace = true;
 

@@ -33,6 +33,8 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 	bUseControllerRotationYaw = false;
+
+	HandSocketName = "Muzzle_01";
 }
 
 void ARoguelikeCharacter::PostInitializeComponents()
@@ -124,10 +126,10 @@ void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 	if (ensureAlways(ClassToSpawn))
 	{
 		// Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
 
-		// Play a particle effect on hand
-		UNiagaraFunctionLibrary::SpawnSystemAttached(CastingVFX, GetMesh(),"Muzzle_01",  FVector::ZeroVector,  FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
+		// Play a particle effect on hand when attacking/casting
+		UNiagaraFunctionLibrary::SpawnSystemAttached(CastingVFX, GetMesh(),HandSocketName,  FVector::ZeroVector,  FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
 
 
 		/////////////////// DEBUG FOR TESTING
@@ -222,7 +224,7 @@ void ARoguelikeCharacter::BlackHoleAttack_TimeElapsed()
 		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
 	
 		//Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
 		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
 	
 		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
@@ -256,7 +258,7 @@ void ARoguelikeCharacter::TeleportAbility_TimeElapsed()
 		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
 	
 		//Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
 		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
 	
 		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
