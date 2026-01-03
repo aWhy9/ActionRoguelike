@@ -7,6 +7,7 @@
 #include "RLAICharacter.generated.h"
 
 class UPawnSensingComponent;
+class URLAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLAICharacter : public ACharacter
@@ -20,6 +21,9 @@ public:
 protected:
 
 	virtual void PostInitializeComponents() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	URLAttributeComponent* AttributeComponent;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComponent;

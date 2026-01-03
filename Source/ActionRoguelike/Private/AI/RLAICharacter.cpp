@@ -6,11 +6,16 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
+#include "RLAttributeComponent.h"
 
 // Sets default values
 ARLAICharacter::ARLAICharacter()
 {
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComponent");
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("Attribute Component");
 }
 
 void ARLAICharacter::PostInitializeComponents()
