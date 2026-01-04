@@ -28,6 +28,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	FName TimeToHitParamName;
+
+protected:
+	
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent, float NewHealth, float Delta);
+
+	UFUNCTION()
+	void SetTargetActor(AActor* NewTarget);
+
 };

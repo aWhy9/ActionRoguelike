@@ -7,9 +7,6 @@
 // Sets default values
 ARTreasureChest::ARTreasureChest()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("Base Mesh");
 	RootComponent = BaseMesh;
 
@@ -32,22 +29,5 @@ void ARTreasureChest::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		LidMesh->SetRelativeRotation(FRotator(0, 0, 0));
 		bIsOpen = false;
-	}
-	
-	
+	}	
 }
-
-// Called when the game starts or when spawned
-void ARTreasureChest::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ARTreasureChest::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

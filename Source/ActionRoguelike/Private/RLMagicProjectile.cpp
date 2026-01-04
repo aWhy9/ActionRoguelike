@@ -29,7 +29,7 @@ ARLMagicProjectile::ARLMagicProjectile()
 	NiagaraComponent->SetupAttachment(SphereComponent);
 
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
-	MovementComponent->InitialSpeed = 2000.0f;
+	MovementComponent->InitialSpeed = 4000.0f;
 	MovementComponent->bRotationFollowsVelocity = true;
 	MovementComponent->bInitialVelocityInLocalSpace = true;
 
@@ -59,7 +59,7 @@ void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		URLAttributeComponent* AttributeComponent = Cast<URLAttributeComponent>(OtherActor->GetComponentByClass(URLAttributeComponent::StaticClass()));
 		if (AttributeComponent)
 			{
-				AttributeComponent->ApplyHealthChange(Damage);
+				AttributeComponent->ApplyHealthChange(GetInstigator(), Damage);
 				ProjectileImapct();
 			}		
 	}

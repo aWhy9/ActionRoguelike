@@ -13,12 +13,42 @@ class ACTIONROGUELIKE_API URLAttributeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+
+protected:
+
+	// EditAnywhere - Edit in BP editor and per instance in level
+	// VisibleAnywhere - 'read' only in editor and level (Use for components)
+	// EditDefaultsAnywhere - hide variable per instance, edit in BP editor only
+	// VisibleDefaultsOnly - 'read' only access for variable, only in BP editor (uncommon)
+	// EditInstanceOnly - allow only editing of instance (eg. when placed in level)
+	// --
+	// BlueprintReadOnly - read-only in the Nlueprint scripting (doesn't affect details panel)
+	// BlueprintReadWrite - read-write access in Blueprints
+	// --
+	// Category = "" - Display only for details panel and blueprint context menu
+	// --
+	// meta = (Displayname = "") - Change Display name in editor
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	float Health;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	float MaxHealth;
+
+public:
+	
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	static URLAttributeComponent* GetAttributes(AActor* FromActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes", meta = (Displayname = "IsAlive"))
+	static bool IsActorAlive(AActor* Actor);
+	
 	// Sets default values for this component's properties
 	URLAttributeComponent();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
+
 	
 public:
 	
@@ -26,7 +56,7 @@ public:
 	bool IsAlive() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float Delta);
+	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
 
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const;
@@ -36,13 +66,4 @@ public:
 
 	UFUNCTION(Blueprintable)
 	bool IsFullHealth() const;
-	
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
-	float Health;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
-	float MaxHealth;
-
-
 };

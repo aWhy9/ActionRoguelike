@@ -23,7 +23,7 @@ public:
 	ARoguelikeCharacter();
 
 protected:
-
+	
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComponent;
 
@@ -57,6 +57,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;
 
+	UPROPERTY(VisibleAnywhere)
+	FName TimeToHitParamName;
+	
 	FTimerHandle TimerHandle_PrimaryAttack;
 
 	FTimerHandle TimerHandle_BlackHoleAttack;

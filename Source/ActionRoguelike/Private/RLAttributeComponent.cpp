@@ -3,6 +3,7 @@
 
 #include "RLAttributeComponent.h"
 
+
 // Sets default values for this component's properties
 URLAttributeComponent::URLAttributeComponent()
 {
@@ -30,7 +31,7 @@ bool URLAttributeComponent::IsFullHealth() const
 	return Health == MaxHealth;
 }
 
-bool URLAttributeComponent::ApplyHealthChange(float Delta)
+bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	float OldHealth = Health;
 	
@@ -38,8 +39,27 @@ bool URLAttributeComponent::ApplyHealthChange(float Delta)
 
 	// Check to see if health actually changed, I.E. already at 0
 	float ActualDelta = Health - OldHealth;
-	OnHealthChanged.Broadcast(nullptr, this, Health, ActualDelta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
 	
 	return ActualDelta != 0;
 }
 
+URLAttributeComponent* URLAttributeComponent::GetAttributes(AActor* FromActor)
+{
+	if (FromActor)
+	{
+		return FromActor->FindComponentByClass<URLAttributeComponent>();
+	}
+	return nullptr;
+}
+
+bool URLAttributeComponent::IsActorAlive(AActor* Actor)
+{
+	URLAttributeComponent* AttributeComponent = GetAttributes(Actor);
+	if (AttributeComponent)
+	{
+		return AttributeComponent->IsAlive();
+	}
+
+	return false;
+}

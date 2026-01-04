@@ -35,7 +35,7 @@ void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 			bCanInteract = false;return;
 		}
 		Super::Interact_Implementation(InstigatorPawn);
-		AttributeComponent->ApplyHealthChange(HealAmount);			
+		AttributeComponent->ApplyHealthChange(this, HealAmount);			
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractVFX, GetActorLocation());
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());	
 	}

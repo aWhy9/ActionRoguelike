@@ -35,6 +35,8 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	bUseControllerRotationYaw = false;
 
 	HandSocketName = "Muzzle_01";
+
+	TimeToHitParamName = "TimeToHit";
 }
 
 void ARoguelikeCharacter::PostInitializeComponents()
@@ -234,9 +236,6 @@ void ARoguelikeCharacter::BlackHoleAttack_TimeElapsed()
 		SpawnParams.Instigator = this;	
 	
 		GetWorld()->SpawnActor<AActor>(BlackHoleClass, SpawnTM, SpawnParams);
-
-
-		
 	}
 	
 }
@@ -275,6 +274,12 @@ void ARoguelikeCharacter::TeleportAbility_TimeElapsed()
 void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent,
 	float NewHealth, float Delta)
 {
+	if (Delta < 0.0f)
+	{
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+		
+	}
+	
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
