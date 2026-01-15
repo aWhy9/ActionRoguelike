@@ -26,7 +26,6 @@ void ARGameModeBase::StartPlay()
 	GetWorldTimerManager().SetTimer(TimeHandle_SpawnBots, this, &ARGameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 }
 
-
 void ARGameModeBase::SpawnBotTimerElapsed()
 {
 	NrOfAliveBots = 0;
@@ -78,5 +77,21 @@ void ARGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 
 		// Track all the used spawn locations
 		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
+	}
+}
+
+void ARGameModeBase::KillAll()
+{
+	for (TActorIterator<ARLAICharacter> It(GetWorld()); It; ++ It)
+	{
+		ARLAICharacter* Bot = *It;
+		
+		UE_LOG(LogTemp, Warning, TEXT("AI TRACKED: %p"), Bot);
+		
+		URLAttributeComponent* AttributeComponent = URLAttributeComponent::GetAttributes(Bot);
+		if (ensure(AttributeComponent && AttributeComponent->IsAlive()))
+		{
+			AttributeComponent->Kill(this); // @fixme: pass in player? for kill credit
+		}
 	}
 }

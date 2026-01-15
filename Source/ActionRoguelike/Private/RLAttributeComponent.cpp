@@ -11,6 +11,11 @@ URLAttributeComponent::URLAttributeComponent()
 	Health = 100;
 }
 
+bool URLAttributeComponent::Kill(AActor* InstigatorActor)
+{
+	return ApplyHealthChange(InstigatorActor, -GetMaxHealth());
+}
+
 bool URLAttributeComponent::IsAlive() const
 {
 	return Health > 0.0f;
@@ -33,6 +38,11 @@ bool URLAttributeComponent::IsFullHealth() const
 
 bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
+	if (!GetOwner()->CanBeDamaged())
+	{
+		return false;
+	}
+	
 	float OldHealth = Health;
 	
 	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);

@@ -8,6 +8,8 @@
 
 class UPawnSensingComponent;
 class URLAttributeComponent;
+class UUserWidget;
+class URLWorldUserWidget;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLAICharacter : public ACharacter
@@ -20,6 +22,12 @@ public:
 
 protected:
 
+	
+	URLWorldUserWidget* ActiveHealthBar;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+	
 	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

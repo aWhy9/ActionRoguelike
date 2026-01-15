@@ -8,6 +8,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "RLAttributeComponent.h"
+#include "RLWorldUserWidget.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 ARLAICharacter::ARLAICharacter()
@@ -35,14 +37,27 @@ void ARLAICharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeCompon
 {
 	if (Delta < 0.0f)
 	{
-
 		if (InstigatorActor != this)
 		{
 			SetTargetActor(InstigatorActor);
-			UE_LOG(LogTemp, Warning, TEXT("Target Damaged me and Set to: %p"), InstigatorActor);
+			//UE_LOG(LogTemp, Warning, TEXT("Target Damaged me and Set to: %p"), InstigatorActor);
 		}
+
+		// Spawn Healthbar when damage is taken
+		if (ActiveHealthBar == nullptr)
+		{			
+			ActiveHealthBar = CreateWidget<URLWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+			if (ActiveHealthBar)
+			{
+				ActiveHealthBar->AttachedActor = this;
+				ActiveHealthBar->AddToViewport();
+			}
+		}
+
+		// Hit Flash
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
-		
+
+		// Logic upon death
 		if (NewHealth <= 0.0f)
 		{
 			// Stop BT
@@ -74,7 +89,7 @@ void ARLAICharacter::SetTargetActor(AActor* NewTarget)
 void ARLAICharacter::OnPawnSeen(APawn* Pawn)
 {
 	SetTargetActor(Pawn);
-	UE_LOG(LogTemp, Warning, TEXT("Target Seen and Set to: %p"), Pawn);
+	//UE_LOG(LogTemp, Warning, TEXT("Target Seen and Set to: %p"), Pawn);
 }
 
 

@@ -98,7 +98,6 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("TeleportAbility", IE_Pressed, this, &ARoguelikeCharacter::TeleportAbility);
 }
 
-
 void ARoguelikeCharacter::MoveForward(float Value)
 {
 	FRotator ControlRotation = GetControlRotation();
@@ -135,7 +134,7 @@ void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 
 
 		/////////////////// DEBUG FOR TESTING
-		FString Msg = FString::Printf(TEXT("VFX: %p"), CastingVFX);
+		/*FString Msg = FString::Printf(TEXT("VFX: %p"), CastingVFX);
 		
 		if (GEngine)
 		{
@@ -145,7 +144,7 @@ void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
 				FColor::Green,  // Text color
 				Msg
 			);
-		}
+		}*/
 		////////////////////////// DEBUG
 
 		
@@ -285,5 +284,11 @@ void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeC
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
 	}
+}
+
+
+void ARoguelikeCharacter::HealSelf(float Amount)
+{
+	AttributeComponent->ApplyHealthChange(this, Amount /* = 100 */);
 }
 
