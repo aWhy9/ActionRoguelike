@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "RLAttributeComponent.h"
+#include "RLGameplayFunctionLibrary.h"
 #include "RoguelikeCharacter.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
@@ -18,7 +19,7 @@ ARLMagicProjectile::ARLMagicProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Damage = -20.0f;
+	DamageAmount = -20.0f;
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
 	SphereComponent->SetCollisionProfileName("Projectile");
@@ -53,15 +54,21 @@ void ARLMagicProjectile::Tick(float DeltaTime)
 }
 
 void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,	bool bFromSweep, const FHitResult& SweepResult)
-{	
+{
+	UE_LOG(LogTemp, Warning, TEXT("OVERLAP"));
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		URLAttributeComponent* AttributeComponent = Cast<URLAttributeComponent>(OtherActor->GetComponentByClass(URLAttributeComponent::StaticClass()));
+		/*URLAttributeComponent* AttributeComponent = Cast<URLAttributeComponent>(OtherActor->GetComponentByClass(URLAttributeComponent::StaticClass()));
 		if (AttributeComponent)
-			{
-				AttributeComponent->ApplyHealthChange(GetInstigator(), Damage);
-				ProjectileImapct();
-			}		
+		{
+			AttributeComponent->ApplyHealthChange(GetInstigator(), DamageAmount);
+			ProjectileImapct();
+		}*/
+		if (URLGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, DamageAmount, SweepResult))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("APPLYING DIR DAMAGE"));
+			ProjectileImapct();
+		}
 	}
 }
 

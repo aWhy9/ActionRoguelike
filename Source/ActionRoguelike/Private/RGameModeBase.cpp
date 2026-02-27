@@ -9,6 +9,9 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "DrawDebugHelpers.h"
+#include "RoguelikeCharacter.h"
+
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ARGameModeBase::ARGameModeBase()
 {
@@ -28,13 +31,20 @@ void ARGameModeBase::StartPlay()
 
 void ARGameModeBase::SpawnBotTimerElapsed()
 {
+	if (!CVarSpawnBots.GetValueOnGameThread())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bot spawning disabled via 'CVArSpawnBots'."));
+		return;
+	}
+	
 	NrOfAliveBots = 0;
 	for (TActorIterator<ARLAICharacter> It(GetWorld()); It; ++ It)
 	{
 		ARLAICharacter* Bot = *It;
 
 		URLAttributeComponent* AttributeComponent = URLAttributeComponent::GetAttributes(Bot);
-		if (ensure(AttributeComponent && AttributeComponent->IsAlive()))
+		//if (ensure(AttributeComponent && AttributeComponent->IsAlive()))
+		if (AttributeComponent && AttributeComponent->IsAlive())
 		{
 			NrOfAliveBots++;
 		}
@@ -62,6 +72,7 @@ void ARGameModeBase::SpawnBotTimerElapsed()
 	
 }
 
+// Spawn AI Actor
 void ARGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
 {
 	if (QueryStatus != EEnvQueryStatus::Success)
@@ -80,6 +91,8 @@ void ARGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 	}
 }
 
+
+// Debug for killing all AI
 void ARGameModeBase::KillAll()
 {
 	for (TActorIterator<ARLAICharacter> It(GetWorld()); It; ++ It)
@@ -94,4 +107,29 @@ void ARGameModeBase::KillAll()
 			AttributeComponent->Kill(this); // @fixme: pass in player? for kill credit
 		}
 	}
+}
+
+void ARGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
+{
+	ARoguelikeCharacter* Player = Cast<ARoguelikeCharacter>(VictimActor);
+	if (Player)
+	{
+		FTimerHandle TimerHandle_RespawnDelay;
+
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this,"RespawnPlayerElapsed", Player->GetController());
+
+		float RespawnDelay = 2.0f;
+		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
+	}
+	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim %s, Killer %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
+}
+
+void ARGameModeBase::RespawnPlayerElapsed(AController* Controller)
+{
+	if (ensure(Controller))
+	{
+		Controller->UnPossess();
+		RestartPlayer(Controller);		
+	}	
 }

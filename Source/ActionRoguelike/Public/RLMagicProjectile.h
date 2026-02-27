@@ -48,7 +48,7 @@ protected:
 	TSubclassOf<UCameraShakeBase> CameraShake;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float Damage;
+	float DamageAmount;
 	
 protected:
 

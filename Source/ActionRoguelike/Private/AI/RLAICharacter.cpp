@@ -10,15 +10,20 @@
 #include "RLAttributeComponent.h"
 #include "RLWorldUserWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ARLAICharacter::ARLAICharacter()
 {
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComponent");
 
+	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("Attribute Component");
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("Attribute Component");
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	TimeToHitParamName = "TimeToHit";
 }
@@ -56,8 +61,8 @@ void ARLAICharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeCompon
 
 		// Hit Flash
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
-
-		// Logic upon death
+		
+		// Died
 		if (NewHealth <= 0.0f)
 		{
 			// Stop BT
@@ -70,6 +75,10 @@ void ARLAICharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeCompon
 			// Ragdoll on death
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetCollisionProfileName(("Ragdoll"));
+
+			// Ensure no collision walls remain in world and it doesn't endlessly fall
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GetCharacterMovement()->DisableMovement();
 			
 			// Set lifespan
 			SetLifeSpan(10.0f);

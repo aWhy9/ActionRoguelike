@@ -46,6 +46,11 @@ void ARoguelikeCharacter::PostInitializeComponents()
 	AttributeComponent->OnHealthChanged.AddDynamic(this, &ARoguelikeCharacter::OnHealthChanged);
 }
 
+FVector ARoguelikeCharacter::GetPawnViewLocation() const
+{
+	return CameraComponent->GetComponentLocation();
+}
+
 
 // Called when the game starts or when spawned
 void ARoguelikeCharacter::BeginPlay()
