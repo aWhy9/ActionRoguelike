@@ -18,6 +18,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float HealAmount;	
+
+	UPROPERTY(EditAnywhere)
+	int32 CreditCost = 5;
 	
 public:
 

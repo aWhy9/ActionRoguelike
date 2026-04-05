@@ -39,6 +39,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 NrOfAliveBots;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 BotCoinValue = 5;	
 	
 	UFUNCTION()
 	void SpawnBotTimerElapsed();

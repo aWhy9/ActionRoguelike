@@ -9,6 +9,7 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "DrawDebugHelpers.h"
+#include "RLPlayerState.h"
 #include "RoguelikeCharacter.h"
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
@@ -111,6 +112,8 @@ void ARGameModeBase::KillAll()
 
 void ARGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 {
+
+	// Respawn Victim
 	ARoguelikeCharacter* Player = Cast<ARoguelikeCharacter>(VictimActor);
 	if (Player)
 	{
@@ -122,6 +125,19 @@ void ARGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 		float RespawnDelay = 2.0f;
 		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
 	}
+
+	// Award Credits to killer if they have a valid PlayerState
+	ARoguelikeCharacter* KillerPlayer = Cast<ARoguelikeCharacter>(Killer);
+	if (KillerPlayer)
+	{
+		ARLPlayerState* PS = KillerPlayer->GetPlayerState<ARLPlayerState>();
+		if (PS)
+		{
+			PS->AddCredits(BotCoinValue);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Credits earned"));
+		}
+	}
+	
 	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim %s, Killer %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
 }
 

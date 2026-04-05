@@ -4,6 +4,7 @@
 #include "RLHealthPotion.h"
 #include "RLAttributeComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "RLPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -21,7 +22,9 @@ void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		return;
 	}
+
 	
+
 	
 	if (URLAttributeComponent* AttributeComponent = InstigatorPawn->FindComponentByClass<URLAttributeComponent>())
 	{
@@ -37,7 +40,14 @@ void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		Super::Interact_Implementation(InstigatorPawn);
 		AttributeComponent->ApplyHealthChange(this, HealAmount);			
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), InteractVFX, GetActorLocation());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());	
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), InteractSound, GetActorLocation());
+		if (ARLPlayerState* PS = InstigatorPawn->GetPlayerState<ARLPlayerState>())
+		{
+			if (PS->Credits >= CreditCost)
+			{
+				PS->RemoveCredits(CreditCost);
+			}			
+		}
 	}
 		
 }
