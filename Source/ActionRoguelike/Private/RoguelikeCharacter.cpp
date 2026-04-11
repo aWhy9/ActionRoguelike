@@ -4,6 +4,7 @@
 #include "RoguelikeCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraFunctionLibrary.h"
+#include "RActionComponent.h"
 #include "RInteractionComponent.h"
 #include "RLAttributeComponent.h"
 #include "RLMagicProjectile.h"
@@ -29,12 +30,12 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	InteractionComponent = CreateDefaultSubobject<URInteractionComponent>("InteractionComponent");
 	
 	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("AttributeComponent");
+
+	ActionComponent = CreateDefaultSubobject<URActionComponent>("ActionComponent");
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 	bUseControllerRotationYaw = false;
-
-	HandSocketName = "Muzzle_01";
 
 	TimeToHitParamName = "TimeToHit";
 }
@@ -101,6 +102,9 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &ARoguelikeCharacter::BlackHoleAttack);
 
 	PlayerInputComponent->BindAction("TeleportAbility", IE_Pressed, this, &ARoguelikeCharacter::TeleportAbility);
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ARoguelikeCharacter::SpringtStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ARoguelikeCharacter::SprintStop);
 }
 
 void ARoguelikeCharacter::MoveForward(float Value)
@@ -127,86 +131,22 @@ void ARoguelikeCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);	
 }
 
-void ARoguelikeCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
+
+void ARoguelikeCharacter::SpringtStart()
 {
-	if (ensureAlways(ClassToSpawn))
-	{
-		// Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
+	ActionComponent->StartActionByName(this, "Sprint");
+}
 
-		// Play a particle effect on hand when attacking/casting
-		UNiagaraFunctionLibrary::SpawnSystemAttached(CastingVFX, GetMesh(),HandSocketName,  FVector::ZeroVector,  FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
-
-
-		/////////////////// DEBUG FOR TESTING
-		/*FString Msg = FString::Printf(TEXT("VFX: %p"), CastingVFX);
-		
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,             // Key (-1 = new message every time)
-				5.0f,           // Duration (seconds)
-				FColor::Green,  // Text color
-				Msg
-			);
-		}*/
-		////////////////////////// DEBUG
-
-		
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;
-
-		FCollisionShape Shape;
-		Shape.SetSphere(20.0f);
-
-		// Ignore Player
-		FCollisionQueryParams CollisionParams;
-		CollisionParams.AddIgnoredActor(this);
-
-		FCollisionObjectQueryParams ObjectQueryParams;
-		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-		ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
-		ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-
-		FVector TraceStart = CameraComponent->GetComponentLocation();
-
-		// Endpoint far into the look-at distance (not too far, still adjust somewhat towwards crosshair on miss)
-		FVector TraceEnd = CameraComponent->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
-
-		FHitResult Hit;
-		// returns true if we got a blocking hit
-		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectQueryParams, Shape, CollisionParams))
-		{
-
-			// Overwrite trace end with impact point in world
-			TraceEnd = Hit.ImpactPoint;
-		}
-
-		// fnd new direction/rotation from hand pointing to impact point in world
-		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
-
-		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
-		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
-	}
-	
+void ARoguelikeCharacter::SprintStop()
+{
+	ActionComponent->StopActionByName(this, "Sprint");
 }
 
 void ARoguelikeCharacter::PrimaryAttack()
 {
-
-	PlayAnimMontage(AttackAnim);
-
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ARoguelikeCharacter::PrimaryAttack_TimeElapsed, 0.2f);
-
-	//GetWorldTimerManager().ClearTimer(TimerHandle_PrimaryAttack);	
+	ActionComponent->StartActionByName(this, "PrimaryAttack");
 }
-void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
-{
-	SpawnProjectile(ProjectileClass);
-	
-	
-}
+
 
 void ARoguelikeCharacter::PrimaryInteract()
 {
@@ -215,64 +155,13 @@ void ARoguelikeCharacter::PrimaryInteract()
 
 void ARoguelikeCharacter::BlackHoleAttack()
 {
-	PlayAnimMontage(AttackAnim);
-	
-	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAttack, this, &ARoguelikeCharacter::BlackHoleAttack_TimeElapsed, 0.2f);	
-	
+	ActionComponent->StartActionByName(this, "Blackhole");	
 }
 
-void ARoguelikeCharacter::BlackHoleAttack_TimeElapsed()
-{
-	if (BlackHoleClass)
-	{
-		FVector CameraLocation = CameraComponent->GetComponentLocation();
-		FRotator CameraRotation = CameraComponent->GetComponentRotation();
-		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
-	
-		//Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
-		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
-	
-		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
-	
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;	
-	
-		GetWorld()->SpawnActor<AActor>(BlackHoleClass, SpawnTM, SpawnParams);
-	}
-	
-}
 
 void ARoguelikeCharacter::TeleportAbility()
 {
-
-	PlayAnimMontage(AttackAnim);
-
-	GetWorldTimerManager().SetTimer(TimerHandle_TeleportAbility, this, &ARoguelikeCharacter::TeleportAbility_TimeElapsed, 0.2f);	
-}
-
-void ARoguelikeCharacter::TeleportAbility_TimeElapsed()
-{
-	if (TeleportProjectileClass)
-	{
-		FVector CameraLocation = CameraComponent->GetComponentLocation();
-		FRotator CameraRotation = CameraComponent->GetComponentRotation();
-		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 1000);
-	
-		//Handle aiming of projectile
-		FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
-		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
-	
-		FTransform SpawnTM = FTransform(AimRotation, HandLocation);
-	
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Instigator = this;	
-	
-		GetWorld()->SpawnActor<AActor>(TeleportProjectileClass, SpawnTM, SpawnParams);
-	}
-	
+	ActionComponent->StartActionByName(this, "Teleport");
 }
 
 void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent,

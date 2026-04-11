@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "RAction.generated.h"
 
+class UWorld;
+
 /**
  * 
  */
@@ -25,6 +27,7 @@ public:
 	// Action Nicknname to start/stop without a reference to the object
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	FName ActionName;
-	
+
+	UWorld* GetWorld() const override;
 	
 };

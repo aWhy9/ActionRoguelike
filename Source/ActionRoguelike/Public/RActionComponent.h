@@ -29,6 +29,11 @@ public:
 
 protected:
 
+
+	// Granted Abilities at Game Start
+	UPROPERTY(EditAnywhere, Category = "Actions")
+	TArray<TSubclassOf<URAction>> DefaultActions;
+	
 	UPROPERTY()
 	TArray<URAction*> Actions;
 	

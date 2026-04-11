@@ -20,7 +20,10 @@ void URActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	for (TSubclassOf<URAction> ActionClass : DefaultActions)
+	{
+		AddAction(ActionClass);
+	}
 	
 }
 
