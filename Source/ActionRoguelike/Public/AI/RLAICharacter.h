@@ -8,6 +8,7 @@
 
 class UPawnSensingComponent;
 class URLAttributeComponent;
+class URActionComponent;
 class UUserWidget;
 class URLWorldUserWidget;
 
@@ -32,6 +33,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	URLAttributeComponent* AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	URActionComponent* ActionComp;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComponent;

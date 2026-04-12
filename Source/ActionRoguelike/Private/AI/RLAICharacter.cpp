@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
+#include "RActionComponent.h"
 #include "RLAttributeComponent.h"
 #include "RLWorldUserWidget.h"
 #include "Blueprint/UserWidget.h"
@@ -20,6 +21,8 @@ ARLAICharacter::ARLAICharacter()
 
 	AttributeComponent = CreateDefaultSubobject<URLAttributeComponent>("Attribute Component");
 
+	ActionComp = CreateDefaultSubobject<URActionComponent>("Action Component");
+	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
@@ -35,6 +38,7 @@ void ARLAICharacter::PostInitializeComponents()
 	
 	PawnSensingComponent->OnSeePawn.AddDynamic(this, &ARLAICharacter::OnPawnSeen);
 	AttributeComponent->OnHealthChanged.AddDynamic(this, &ARLAICharacter::OnHealthChanged);
+	
 }
 
 void ARLAICharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeComponent* OwningComponent, float NewHealth,

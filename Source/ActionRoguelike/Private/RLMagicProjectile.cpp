@@ -11,6 +11,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "RActionComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -58,12 +59,16 @@ void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	UE_LOG(LogTemp, Warning, TEXT("OVERLAP"));
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		/*URLAttributeComponent* AttributeComponent = Cast<URLAttributeComponent>(OtherActor->GetComponentByClass(URLAttributeComponent::StaticClass()));
-		if (AttributeComponent)
+				
+		URActionComponent* ActionComp = Cast<URActionComponent>(OtherActor->GetComponentByClass(URActionComponent::StaticClass()));
+		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag))
 		{
-			AttributeComponent->ApplyHealthChange(GetInstigator(), DamageAmount);
-			ProjectileImapct();
-		}*/
+			MovementComponent->Velocity = -MovementComponent->Velocity;
+
+			SetInstigator(Cast<APawn>(OtherActor));
+			return;
+		}
+		// Apply Damage and Impulse
 		if (URLGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, DamageAmount, SweepResult))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("APPLYING DIR DAMAGE"));
