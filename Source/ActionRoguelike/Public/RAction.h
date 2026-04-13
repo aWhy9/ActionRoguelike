@@ -29,9 +29,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	bool bIsRunning;
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	float AbilityCost;
+	
+	bool bIsRunning;	
 	
 public:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	bool bAutoStart;
 
 	UFUNCTION(BlueprintCallable, Category= "Action")
 	bool IsRunning() const;
@@ -50,5 +56,9 @@ public:
 	FName ActionName;
 
 	UWorld* GetWorld() const override;
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	float GetAbilityCost();
+	
 	
 };

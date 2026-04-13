@@ -12,6 +12,8 @@ URLAttributeComponent::URLAttributeComponent()
 {
 	MaxHealth = 100;
 	Health = 100;
+	MaxRage = 100;
+	Rage = 0;
 }
 
 bool URLAttributeComponent::Kill(AActor* InstigatorActor)
@@ -52,6 +54,8 @@ bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Del
 		float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
 
 		Delta *= DamageMultiplier;
+
+		Rage += -Delta;
 	}
 	
 	float OldHealth = Health;
@@ -73,6 +77,16 @@ bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Del
 	}
 	
 	return ActualDelta != 0;
+}
+
+bool URLAttributeComponent::ApplyRageChange(float Delta)
+{
+	if (Rage > 0)
+	{
+		Rage -= Delta;
+		return true;	
+	}
+	return false;	
 }
 
 URLAttributeComponent* URLAttributeComponent::GetAttributes(AActor* FromActor)

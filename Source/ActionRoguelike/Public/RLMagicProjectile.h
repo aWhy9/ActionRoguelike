@@ -14,6 +14,7 @@ class UNiagaraSystem;
 class UAudioComponent;
 class USoundBase;
 class UCameraShakeBase;
+class URActionEffect;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLMagicProjectile : public AActor
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<URActionEffect> BurningActionClass;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComponent;

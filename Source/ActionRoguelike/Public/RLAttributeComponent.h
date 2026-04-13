@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RAction.h"
+
 #include "RLAttributeComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, URLAttributeComponent*, OwningComponent, float, NewHealth, float, Delta);
@@ -22,7 +24,7 @@ protected:
 	// VisibleDefaultsOnly - 'read' only access for variable, only in BP editor (uncommon)
 	// EditInstanceOnly - allow only editing of instance (eg. when placed in level)
 	// --
-	// BlueprintReadOnly - read-only in the Nlueprint scripting (doesn't affect details panel)
+	// BlueprintReadOnly - read-only in the Blueprint scripting (doesn't affect details panel)
 	// BlueprintReadWrite - read-write access in Blueprints
 	// --
 	// Category = "" - Display only for details panel and blueprint context menu
@@ -34,6 +36,12 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
 	float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	float Rage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	float MaxRage;
 
 public:
 	
@@ -61,6 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
 
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyRageChange(float Delta);
+	
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const;
 

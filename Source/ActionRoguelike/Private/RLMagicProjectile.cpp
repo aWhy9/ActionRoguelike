@@ -12,6 +12,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "RActionComponent.h"
+#include "RActionEffect.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -70,9 +71,13 @@ void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		}
 		// Apply Damage and Impulse
 		if (URLGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, DamageAmount, SweepResult))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("APPLYING DIR DAMAGE"));
+		{		
 			ProjectileImapct();
+
+			if (ActionComp)
+			{
+				ActionComp->AddAction(GetInstigator(), BurningActionClass);
+			}
 		}
 	}
 }

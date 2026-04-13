@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "RInteractionComponent.generated.h"
 
+class URLWorldUserWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIONROGUELIKE_API URInteractionComponent : public UActorComponent
@@ -22,6 +23,26 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	
+	void FindBestInteractable();
+
+	UPROPERTY()
+	AActor* FocusedActor;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trace")
+	float TraceDistance;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Trace")
+	float TraceRadius;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trace")
+	TEnumAsByte<ECollisionChannel> CollisionChannel;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<URLWorldUserWidget> DefaultWidgetClass;
+
+	UPROPERTY()
+	URLWorldUserWidget* DefaultWidgetInstance;
 
 public:	
 	// Called every frame

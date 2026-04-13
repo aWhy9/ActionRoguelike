@@ -55,6 +55,11 @@ UWorld* URAction::GetWorld() const
 	return nullptr;
 }
 
+float URAction::GetAbilityCost()
+{
+	return AbilityCost;
+}
+
 URActionComponent* URAction::GetOwningComponent() const
 {
 	return Cast<URActionComponent>(GetOuter());

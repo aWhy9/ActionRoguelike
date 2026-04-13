@@ -15,7 +15,8 @@ class ACTIONROGUELIKE_API ARLPlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	
+
+	// Should be protected
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Credits")
 	int32 Credits = 0;
 
