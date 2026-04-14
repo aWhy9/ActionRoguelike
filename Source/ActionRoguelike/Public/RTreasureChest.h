@@ -34,6 +34,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* LidMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Animation")
+	// RepUsing is same as RepNotify but in C++
+	UPROPERTY(ReplicatedUsing= "OnRep_LidOpened", VisibleAnywhere, BlueprintReadWrite, Category = "Animation")
 	bool bIsOpen;
+
+	UFUNCTION()
+	void OnRep_LidOpened();
 };

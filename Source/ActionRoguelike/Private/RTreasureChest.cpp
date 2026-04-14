@@ -2,6 +2,7 @@
 
 
 #include "RTreasureChest.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -16,11 +17,12 @@ ARTreasureChest::ARTreasureChest()
 	TargetPitch = 110;
 	bIsOpen = false;
 	
+	SetReplicates(true);
 }
 
 void ARTreasureChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	if (!bIsOpen)
+	/*if (!bIsOpen)
 	{
 		LidMesh->SetRelativeRotation(FRotator(TargetPitch, 0, 0));
 		bIsOpen = true;
@@ -29,5 +31,22 @@ void ARTreasureChest::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		LidMesh->SetRelativeRotation(FRotator(0, 0, 0));
 		bIsOpen = false;
-	}	
+	}	*/
+
+	bIsOpen = !bIsOpen;
+	OnRep_LidOpened();
+	
+}
+
+void ARTreasureChest::OnRep_LidOpened()
+{
+	float CurrPitch = bIsOpen ? TargetPitch : 0.0f;
+	LidMesh->SetRelativeRotation(FRotator(CurrPitch, 0, 0));
+}
+
+void ARTreasureChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARTreasureChest, bIsOpen);
 }
