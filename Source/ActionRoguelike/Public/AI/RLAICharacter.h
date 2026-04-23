@@ -11,6 +11,7 @@ class URLAttributeComponent;
 class URActionComponent;
 class UUserWidget;
 class URLWorldUserWidget;
+class AActor;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARLAICharacter : public ACharacter
@@ -40,8 +41,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComponent;
 
+	
 	UPROPERTY(VisibleAnywhere)
 	FName TimeToHitParamName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	TSubclassOf<URLWorldUserWidget> SpottedWidgetClass;
 
 protected:
 	
@@ -54,4 +59,6 @@ protected:
 	UFUNCTION()
 	void SetTargetActor(AActor* NewTarget);
 
+	UFUNCTION()
+	AActor* GetTargetActor() const;
 };

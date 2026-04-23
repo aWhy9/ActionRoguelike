@@ -4,6 +4,7 @@
 #include "RLAttributeComponent.h"
 
 #include "RGameModeBase.h"
+#include "Net/UnrealNetwork.h"
 
 static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("rl.DamageMultiplier"), 1.0f, TEXT("Global Damage Modifier for Attribute Component."), ECVF_Cheat);
 
@@ -14,6 +15,8 @@ URLAttributeComponent::URLAttributeComponent()
 	Health = 100;
 	MaxRage = 100;
 	Rage = 0;
+
+	SetIsReplicatedByDefault(true);
 }
 
 bool URLAttributeComponent::Kill(AActor* InstigatorActor)
@@ -64,8 +67,13 @@ bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Del
 
 	// Check to see if health actually changed, I.E. already at 0
 	float ActualDelta = Health - OldHealth;
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
+	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
 
+	if (ActualDelta != 0.0f)
+	{
+		MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
+	}	
+	
 	// On Death
 	if (ActualDelta < 0.0f && Health == 0.0f)
 	{
@@ -89,6 +97,7 @@ bool URLAttributeComponent::ApplyRageChange(float Delta)
 	return false;	
 }
 
+
 URLAttributeComponent* URLAttributeComponent::GetAttributes(AActor* FromActor)
 {
 	if (FromActor)
@@ -109,3 +118,17 @@ bool URLAttributeComponent::IsActorAlive(AActor* Actor)
 	return false;
 }
 
+void URLAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth, float Delta)
+{
+	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+
+
+void URLAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URLAttributeComponent, Health);
+	DOREPLIFETIME(URLAttributeComponent, MaxHealth);
+	//DOREPLIFETIME_CONDITION(URLAttributeComponent, MaxHealth, COND_OwnerOnly); // FOR OPTIMIZATION
+}

@@ -46,7 +46,7 @@ void ARExplosiveBarrel::PostInitializeComponents()
 
 void ARExplosiveBarrel::Explode()
 {
-	RadialForceComponent->FireImpulse();
+	//RadialForceComponent->FireImpulse();
 
 }
 void ARExplosiveBarrel::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

@@ -20,6 +20,9 @@ class ACTIONROGUELIKE_API URAction : public UObject
 
 protected:
 
+	UPROPERTY(Replicated)
+	URActionComponent* ActionComp;
+
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	URActionComponent* GetOwningComponent() const;
 
@@ -31,10 +34,16 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	float AbilityCost;
-	
-	bool bIsRunning;	
+
+	UPROPERTY(ReplicatedUsing="OnRep_IsRunning")
+	bool bIsRunning;
+
+	UFUNCTION()
+	void OnRep_IsRunning();
 	
 public:
+
+	void Initialize(URActionComponent* NewActionComp);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	bool bAutoStart;
@@ -60,5 +69,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	float GetAbilityCost();
 	
-	
+	bool IsSupportedForNetworking() const override
+	{
+		return true;
+	}
 };

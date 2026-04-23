@@ -40,7 +40,8 @@ ARLProjectileBase::ARLProjectileBase()
 	RadialForceComponent->bAutoActivate = true;
 	RadialForceComponent->bIgnoreOwningActor = true;	
 	RadialForceComponent->AddCollisionChannelToAffect(ECC_WorldDynamic);
-	
+
+
 }	
 	
 

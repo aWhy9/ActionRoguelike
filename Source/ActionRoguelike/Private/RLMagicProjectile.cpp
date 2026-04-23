@@ -38,7 +38,8 @@ ARLMagicProjectile::ARLMagicProjectile()
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>("AudioComponent");
 	AudioComponent->SetupAttachment(RootComponent);
-	
+
+	//SetReplicates(true);
 }
 
 // Called when the game starts or when spawned

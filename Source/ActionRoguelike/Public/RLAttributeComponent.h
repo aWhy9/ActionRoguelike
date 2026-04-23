@@ -31,10 +31,10 @@ protected:
 	// --
 	// meta = (Displayname = "") - Change Display name in editor
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes")
 	float Health;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes")
 	float MaxHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
@@ -43,6 +43,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
 	float MaxRage;
 
+	// For cosmetic events so isn't as important to be reliable
+	UFUNCTION(NetMulticast, Reliable) // @FIXME: mark as unreliable once we moved the 'state' out of our character
+	void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+	
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
@@ -56,7 +60,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
-
 	
 public:
 

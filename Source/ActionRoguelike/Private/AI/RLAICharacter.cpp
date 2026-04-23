@@ -99,10 +99,34 @@ void ARLAICharacter::SetTargetActor(AActor* NewTarget)
 	}	
 }
 
+AActor* ARLAICharacter::GetTargetActor() const
+{
+	AAIController* AIC = Cast<AAIController>(GetController());
+	if (AIC)
+	{
+		return Cast<AActor>(AIC->GetBlackboardComponent()->GetValueAsObject(("TargetActor")));
+	}
+	return nullptr;
+}
+
 void ARLAICharacter::OnPawnSeen(APawn* Pawn)
 {
-	SetTargetActor(Pawn);
-	//UE_LOG(LogTemp, Warning, TEXT("Target Seen and Set to: %p"), Pawn);
+	// Ignore if target arleady set
+	if (GetTargetActor() != Pawn)
+	{
+		SetTargetActor(Pawn);
+
+		URLWorldUserWidget* NewWidget = CreateWidget<URLWorldUserWidget>(GetWorld(), SpottedWidgetClass);
+		if (NewWidget)
+		{
+			NewWidget->AttachedActor = this;
+			// Index of 10 (or anything higher than default of 0) places this on top of any other widget
+			//May end up behind the minion health bar otherwise
+			NewWidget->AddToViewport(10);
+		}
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Target Seen and Set to: %p"), Pawn);
 }
 
 

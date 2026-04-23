@@ -3,7 +3,13 @@
 
 #include "RAction.h"
 #include "RActionComponent.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Net/UnrealNetwork.h"
 
+void URAction::Initialize(URActionComponent* NewActionComp)
+{
+	ActionComp = NewActionComp;
+}
 
 bool URAction::CanStart_Implementation(AActor* Instigator)
 {
@@ -12,9 +18,9 @@ bool URAction::CanStart_Implementation(AActor* Instigator)
 		return false;
 	}
 
-	URActionComponent* ActionComp = GetOwningComponent();
+	URActionComponent* Comp = GetOwningComponent();
 	
-	if (ActionComp->ActiveGameplayTags.HasAny(BlockedTags))
+	if (Comp->ActiveGameplayTags.HasAny(BlockedTags))
 	{
 		return false;	
 	}
@@ -23,23 +29,25 @@ bool URAction::CanStart_Implementation(AActor* Instigator)
 
 void URAction::StartAction_Implementation(AActor* Instigator)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Running: %s"), *GetNameSafe(this));
+	//UE_LOG(LogTemp, Warning, TEXT("Running: %s"), *GetNameSafe(this));
+	LogOnScreen(this, FString::Printf(TEXT("Started: %s"), *ActionName.ToString()), FColor::Green);
+	
+	URActionComponent* Comp = GetOwningComponent();
 
-	URActionComponent* ActionComp = GetOwningComponent();
-
-	ActionComp->ActiveGameplayTags.AppendTags(GrantsTags);
+	Comp->ActiveGameplayTags.AppendTags(GrantsTags);
 
 	bIsRunning = true;	
 }
 
 void URAction::StopAction_Implementation(AActor* Instigator)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stopped: %s"), *GetNameSafe(this));
-
-	ensureAlways(bIsRunning);
+	//UE_LOG(LogTemp, Warning, TEXT("Stopped: %s"), *GetNameSafe(this));
+	LogOnScreen(this, FString::Printf(TEXT("Stopped: %s"), *ActionName.ToString()), FColor::White);
 	
-	URActionComponent* ActionComp = GetOwningComponent();
-	ActionComp->ActiveGameplayTags.RemoveTags(GrantsTags);
+	//ensureAlways(bIsRunning);
+	
+	URActionComponent* Comp = GetOwningComponent();
+	Comp->ActiveGameplayTags.RemoveTags(GrantsTags);
 
 	bIsRunning = false;
 }
@@ -47,10 +55,10 @@ void URAction::StopAction_Implementation(AActor* Instigator)
 UWorld* URAction::GetWorld() const
 {
 	//Outer is set when creating action via NewObject<T>
-	UActorComponent* ActorComp = Cast<UActorComponent>(GetOuter());
-	if (ActorComp)
+	AActor* Actor = Cast<AActor>(GetOuter());
+	if (Actor)
 	{
-		return ActorComp->GetWorld();
+		return Actor->GetWorld();
 	}
 	return nullptr;
 }
@@ -61,11 +69,33 @@ float URAction::GetAbilityCost()
 }
 
 URActionComponent* URAction::GetOwningComponent() const
-{
-	return Cast<URActionComponent>(GetOuter());
+{	
+	return ActionComp;
 }
+
+void URAction::OnRep_IsRunning()
+{
+	if (bIsRunning)
+	{
+		StartAction(nullptr);
+	}
+	else
+	{
+		StopAction(nullptr);
+	}
+}
+
 
 bool URAction::IsRunning() const
 {
 	return bIsRunning;
+}
+
+void URAction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URAction, bIsRunning);
+	DOREPLIFETIME(URAction, ActionComp);
+	
 }

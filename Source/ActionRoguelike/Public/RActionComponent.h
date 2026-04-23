@@ -31,23 +31,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 	
-	
 	URActionComponent();
 
 protected:
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartAction(AActor* Instigator, FName ActionName);
 
 	// Granted Abilities at Game Start
 	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<URAction>> DefaultActions;
 	
-	UPROPERTY()
-	TArray<URAction*> Actions;
-	
+	UPROPERTY(Replicated)
+	TArray<URAction*> Actions;	
 
 	virtual void BeginPlay() override;
 
-public:	
+public:
+
+	bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

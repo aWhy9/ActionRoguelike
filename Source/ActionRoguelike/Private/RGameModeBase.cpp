@@ -133,8 +133,7 @@ void ARGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 		ARLPlayerState* PS = KillerPlayer->GetPlayerState<ARLPlayerState>();
 		if (PS)
 		{
-			PS->AddCredits(BotCoinValue);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Credits earned"));
+			PS->AddCredits(BotCoinValue);	
 		}
 	}
 	

@@ -21,6 +21,8 @@ ARLPowerUp::ARLPowerUp()
 
 	RespawnTimerDelay = 2.0f;
 
+	SetReplicates(true);
+
 }
 
 // Called when the game starts or when spawned
