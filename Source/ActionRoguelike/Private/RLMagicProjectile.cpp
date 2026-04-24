@@ -13,6 +13,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "RActionComponent.h"
 #include "RActionEffect.h"
+#include "ActionRoguelike/ActionRoguelike.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -47,8 +48,7 @@ void ARLMagicProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SphereComponent->OnComponentHit.AddDynamic(this, &ARLMagicProjectile::OnComponentHit);
-	
+	SphereComponent->OnComponentHit.AddDynamic(this, &ARLMagicProjectile::OnComponentHit); 	
 }
 
 void ARLMagicProjectile::Tick(float DeltaTime)
@@ -75,7 +75,7 @@ void ARLMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		{		
 			ProjectileImapct();
 
-			if (ActionComp)
+			if (ActionComp && HasAuthority())
 			{
 				ActionComp->AddAction(GetInstigator(), BurningActionClass);
 			}

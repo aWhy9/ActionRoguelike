@@ -10,6 +10,19 @@
 class UWorld;
 class UActorComponent;
 
+USTRUCT()
+struct FActionRepData
+{
+	GENERATED_BODY()
+	
+public:
+	UPROPERTY()
+	bool bIsRunning;
+	
+	UPROPERTY()
+	AActor* Instigator;
+};
+
 /**
  * 
  */
@@ -35,11 +48,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	float AbilityCost;
 
-	UPROPERTY(ReplicatedUsing="OnRep_IsRunning")
-	bool bIsRunning;
+	UPROPERTY(ReplicatedUsing="OnRep_RepData")
+	FActionRepData RepData;
+	//bool bIsRunning;
 
 	UFUNCTION()
-	void OnRep_IsRunning();
+	void OnRep_RepData();
 	
 public:
 

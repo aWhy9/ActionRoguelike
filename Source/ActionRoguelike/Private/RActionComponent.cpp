@@ -17,6 +17,8 @@ URActionComponent::URActionComponent()
 
 }
 
+
+
 void URActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -43,11 +45,8 @@ void URActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
 		
-		FString ActionMsg = FString::Printf(TEXT("[%s] Action: %s : IsRunning: %s : Outer: %s"),
-			*GetNameSafe(GetOwner()),
-			*Action->ActionName.ToString(),
-			Action->IsRunning() ? TEXT("True") : TEXT("False"),
-			*GetNameSafe(GetOuter()));
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action: %s"), *GetNameSafe(GetOwner()), *GetNameSafe(Action));		
+			
 		LogOnScreen(this, ActionMsg, TextColor, 0.0f);
 	}
 }
@@ -59,6 +58,13 @@ void URActionComponent::AddAction(AActor* Instigator, TSubclassOf<URAction> Acti
 		return;
 	}
 
+	// Skip for clients
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client attempting to AddAction: [Class %s]"), *GetNameSafe(ActionClass));
+		return;
+	}
+	
 	URAction* NewAction = NewObject<URAction>(GetOwner(), ActionClass);
 	if (ensure(NewAction))
 	{
@@ -115,6 +121,12 @@ bool URActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 		{
 			if (Action->IsRunning())
 			{
+				// Is Client?
+				if (!GetOwner()->HasAuthority())
+				{
+					ServerStopAction(Instigator, ActionName);
+				}
+				
 				Action->StopAction(Instigator);
 				return true;
 			}
@@ -126,6 +138,11 @@ bool URActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 void URActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName)
 {
 	StartActionByName(Instigator, ActionName);
+}
+
+void URActionComponent::ServerStopAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StopActionByName(Instigator, ActionName);
 }
 
 void URActionComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

@@ -11,6 +11,8 @@
 #include "DrawDebugHelpers.h"
 #include "RLPlayerState.h"
 #include "RoguelikeCharacter.h"
+#include "RSaveGame.h"
+#include "Kismet/GameplayStatics.h"
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
@@ -18,6 +20,17 @@ ARGameModeBase::ARGameModeBase()
 {
 	SpawnTimerInterval = 2.0f;
 	NrOfAliveBots = 0;
+
+	PlayerStateClass = ARLPlayerState::StaticClass();
+
+	SlotName = "SaveGame_01";
+}
+
+void ARGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	LoadSaveGame();
 }
 
 void ARGameModeBase::StartPlay()
@@ -147,4 +160,28 @@ void ARGameModeBase::RespawnPlayerElapsed(AController* Controller)
 		Controller->UnPossess();
 		RestartPlayer(Controller);		
 	}	
+}
+
+void ARGameModeBase::WriteSaveGame()
+{
+	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
+}
+
+void ARGameModeBase::LoadSaveGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	{
+		CurrentSaveGame = Cast<URSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+		if (CurrentSaveGame == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load SaveGame data."));
+			return;
+		}
+		UE_LOG(LogTemp, Log, TEXT("Loaded SaveGame data."));
+	}
+	else
+	{
+		CurrentSaveGame =  Cast<URSaveGame>(UGameplayStatics::CreateSaveGameObject(URSaveGame::StaticClass()));
+		UE_LOG(LogTemp, Log, TEXT("Created new SaveGame data."));
+	}
 }

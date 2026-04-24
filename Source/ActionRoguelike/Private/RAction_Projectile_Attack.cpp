@@ -25,13 +25,14 @@ void URAction_Projectile_Attack::StartAction_Implementation(AActor* Instigator)
 		// Play a particle effect on handsocket
 		UNiagaraFunctionLibrary::SpawnSystemAttached(CastingVFX, Character->GetMesh(),HandSocketName,  FVector::ZeroVector,  FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
 
-		FTimerHandle TimerHandle_AttackDelay;
-		FTimerDelegate Delegate;
-		Delegate.BindUFunction(this, "AttackDelay_Elapsed", Character);
-
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, AttackAnimDelay, false);
-
-		 
+		//if (Character->HasAuthority())
+		//{
+			FTimerHandle TimerHandle_AttackDelay;
+			FTimerDelegate Delegate;
+			Delegate.BindUFunction(this, "AttackDelay_Elapsed", Character);
+		
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, AttackAnimDelay, false);
+		//}		 
 	}	
 }
 
@@ -75,8 +76,14 @@ void URAction_Projectile_Attack::AttackDelay_Elapsed(ACharacter* InstigatorChara
 
 		FVector TraceStart = InstigatorCharacter->GetPawnViewLocation();
 
+		FRotator ViewRotation;
+		FVector ViewLocation;
+		InstigatorCharacter->GetActorEyesViewPoint(ViewLocation, ViewRotation);
+		
 		// Endpoint far into the look-at distance (not too far, still adjust somewhat towwards crosshair on miss)
-		FVector TraceEnd = TraceStart + (InstigatorCharacter->GetControlRotation().Vector() * 5000);
+		//FVector TraceEnd = TraceStart + (InstigatorCharacter->GetControlRotation().Vector() * 5000);
+		FVector TraceEnd = TraceStart + (ViewRotation.Vector() * 5000);
+		
 
 		FHitResult Hit;
 		// returns true if we got a blocking hit

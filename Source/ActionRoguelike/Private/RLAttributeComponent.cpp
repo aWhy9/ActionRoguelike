@@ -62,26 +62,27 @@ bool URLAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Del
 	}
 	
 	float OldHealth = Health;
-	
-	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
-
+	float NewHealth = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
 	// Check to see if health actually changed, I.E. already at 0
-	float ActualDelta = Health - OldHealth;
-	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
-
-	if (ActualDelta != 0.0f)
-	{
-		MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
-	}	
+	float ActualDelta = NewHealth - OldHealth;
 	
-	// On Death
-	if (ActualDelta < 0.0f && Health == 0.0f)
+	if (GetOwner()->HasAuthority())
 	{
-		ARGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ARGameModeBase>();
-		if (GameMode)
+		Health = NewHealth;
+		if (ActualDelta != 0.0f)
 		{
-			GameMode->OnActorKilled(GetOwner(), InstigatorActor);
-		}		
+			MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
+		}
+		
+		// On Death
+		if (ActualDelta < 0.0f && Health == 0.0f)
+		{
+			ARGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ARGameModeBase>();
+			if (GameMode)
+			{
+				GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+			}		
+		}	
 	}
 	
 	return ActualDelta != 0;

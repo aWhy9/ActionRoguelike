@@ -171,11 +171,14 @@ void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URLAttributeC
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 		
 	}
-	
+
+	// On Death
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
+
+		SetLifeSpan(5.0f);
 	}
 }
 

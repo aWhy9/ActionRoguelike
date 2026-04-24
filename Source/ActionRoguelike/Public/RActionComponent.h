@@ -38,6 +38,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
 
+	UFUNCTION(Server, Reliable)
+	void ServerStopAction(AActor* Instigator, FName ActionName);
+
 	// Granted Abilities at Game Start
 	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<URAction>> DefaultActions;
