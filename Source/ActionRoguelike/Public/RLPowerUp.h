@@ -39,9 +39,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USoundBase* InteractSound;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing="OnRep_IsActorHidden")
 	bool bIsActorHidden;
 
+	UFUNCTION()
+	void OnRep_IsActorHidden();
+	
 	UPROPERTY(VisibleAnywhere)
 	bool bCanInteract;
 

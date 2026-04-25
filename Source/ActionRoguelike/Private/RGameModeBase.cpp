@@ -48,13 +48,14 @@ void ARGameModeBase::StartPlay()
 
 void ARGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
+	// Calling before Super:: so we set variables before 'beginplayingstate' is called in PlayerController (which is where we instantiate UI)
 	ARLPlayerState* PS = NewPlayer->GetPlayerState<ARLPlayerState>();
 	if (PS)
 	{
 		PS->LoadPlayerState(CurrentSaveGame);
 	}
+	
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
 

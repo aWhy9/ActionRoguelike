@@ -7,6 +7,7 @@
 #include "RLAttributeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ARLPowerUp::ARLPowerUp()
@@ -33,6 +34,8 @@ void ARLPowerUp::BeginPlay()
 	
 }
 
+
+
 // Implementation of this actor's interact function from InteractionComponent
 void ARLPowerUp::Interact_Implementation(APawn* InstigatorPawn)
 {
@@ -51,17 +54,11 @@ void ARLPowerUp::ToggleActorVisibility()
 {
 	if (!bIsActorHidden)
 	{
-		bIsActorHidden = true;
-		SetActorHiddenInGame(true);		
-		SetActorEnableCollision(false);
-		
+		bIsActorHidden = true;			
 	}
 	else
 	{
-		bIsActorHidden = false;
-		SetActorHiddenInGame(false);		
-		SetActorEnableCollision(true);
-		
+		bIsActorHidden = false;		
 	}
 	
 }
@@ -73,3 +70,25 @@ void ARLPowerUp::Respawn()
 	ToggleActorVisibility();
 }
 
+void ARLPowerUp::OnRep_IsActorHidden()
+{
+	if (!bIsActorHidden)
+	{		
+		SetActorHiddenInGame(true);		
+		SetActorEnableCollision(false);
+		
+	}
+	else
+	{		
+		SetActorHiddenInGame(false);		
+		SetActorEnableCollision(true);
+		
+	}
+}
+
+void ARLPowerUp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARLPowerUp, bIsActorHidden);
+}
