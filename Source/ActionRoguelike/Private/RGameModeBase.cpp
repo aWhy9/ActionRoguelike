@@ -9,10 +9,13 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "DrawDebugHelpers.h"
+#include "RGameplayInterface.h"
 #include "RLPlayerState.h"
 #include "RoguelikeCharacter.h"
 #include "RSaveGame.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
@@ -42,6 +45,18 @@ void ARGameModeBase::StartPlay()
 
 	GetWorldTimerManager().SetTimer(TimeHandle_SpawnBots, this, &ARGameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 }
+
+void ARGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+{
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+
+	ARLPlayerState* PS = NewPlayer->GetPlayerState<ARLPlayerState>();
+	if (PS)
+	{
+		PS->LoadPlayerState(CurrentSaveGame);
+	}
+}
+
 
 void ARGameModeBase::SpawnBotTimerElapsed()
 {
@@ -164,6 +179,46 @@ void ARGameModeBase::RespawnPlayerElapsed(AController* Controller)
 
 void ARGameModeBase::WriteSaveGame()
 {
+	// Iterate all player states, we don't have proper id to match yet (requires Steam orf EQS)
+	for (int32 i = 0; i < GameState->PlayerArray.Num(); ++i)
+	{
+		ARLPlayerState* PS = Cast<ARLPlayerState>(GameState->PlayerArray[i]);
+		if (PS)
+		{
+			PS->SavePlayerState(CurrentSaveGame);
+			break; // Single Player only at this point
+		}
+	}
+
+	CurrentSaveGame->SavedActors.Empty();
+
+	// Iterate the entire world of actors
+	for (FActorIterator It(GetWorld()); It; ++It)
+	{
+		AActor* Actor = *It;
+		// Only interested in our gameplay actors
+		if (!Actor->Implements<URGameplayInterface>())
+		{
+			continue;
+		}
+		
+		FActorSaveData ActorData;
+		ActorData.ActorName = Actor->GetName();
+		ActorData.Transform = Actor->GetActorTransform();
+		
+		// Pass the array to fill data from Actor
+		FMemoryWriter MemWriter(ActorData.ByteData);
+		
+		FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+		// Find only variables with UPROPERTY(SaveGame)
+		Ar.ArIsSaveGame = true;
+		
+		// Converts Actor's SaveGame UPROPERTIES into binary array
+		Actor->Serialize(Ar);
+
+		CurrentSaveGame->SavedActors.Add(ActorData);
+	}
+	
 	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
 }
 
@@ -178,10 +233,42 @@ void ARGameModeBase::LoadSaveGame()
 			return;
 		}
 		UE_LOG(LogTemp, Log, TEXT("Loaded SaveGame data."));
+
+		// Iterate the entire world of actors
+		for (FActorIterator It(GetWorld()); It; ++It)
+		{
+			AActor* Actor = *It;
+			// Only interested in our gameplay actors
+			if (!Actor->Implements<URGameplayInterface>())
+			{
+				continue;
+			}
+
+			for (FActorSaveData ActorData : CurrentSaveGame->SavedActors)
+			{
+				if (ActorData.ActorName == Actor->GetName())
+				{
+					Actor->SetActorTransform(ActorData.Transform);
+
+					FMemoryReader MemReader(ActorData.ByteData);
+					
+					FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+					// Find only variables with UPROPERTY(SaveGame)
+					Ar.ArIsSaveGame = true;
+		
+					// Convert binary array back into actor's variables
+					Actor->Serialize(Ar);
+
+					IRGameplayInterface::Execute_OnActorLoaded(Actor);
+
+					break;
+				}
+			}
+		}
 	}
 	else
 	{
 		CurrentSaveGame =  Cast<URSaveGame>(UGameplayStatics::CreateSaveGameObject(URSaveGame::StaticClass()));
 		UE_LOG(LogTemp, Log, TEXT("Created new SaveGame data."));
-	}
+	}	
 }

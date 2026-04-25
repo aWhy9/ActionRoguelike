@@ -25,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Interact_Implementation(APawn* InstigatorPawn);
+
+	void OnActorLoaded_Implementation();
 	
 protected:
 
@@ -35,7 +37,7 @@ protected:
 	UStaticMeshComponent* LidMesh;
 
 	// RepUsing is same as RepNotify but in C++
-	UPROPERTY(ReplicatedUsing= "OnRep_LidOpened", VisibleAnywhere, BlueprintReadWrite, Category = "Animation")
+	UPROPERTY(ReplicatedUsing= "OnRep_LidOpened", VisibleAnywhere, BlueprintReadWrite, Category = "Animation", SaveGame)
 	bool bIsOpen;
 
 	UFUNCTION()

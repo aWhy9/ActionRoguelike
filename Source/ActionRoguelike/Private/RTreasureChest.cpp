@@ -38,6 +38,11 @@ void ARTreasureChest::Interact_Implementation(APawn* InstigatorPawn)
 	
 }
 
+void ARTreasureChest::OnActorLoaded_Implementation()
+{
+	OnRep_LidOpened();
+}
+
 void ARTreasureChest::OnRep_LidOpened()
 {
 	float CurrPitch = bIsOpen ? TargetPitch : 0.0f;

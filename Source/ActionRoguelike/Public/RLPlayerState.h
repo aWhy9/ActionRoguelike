@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "RLPlayerState.generated.h"
 
+class URSaveGame;
+
 /**
  * 
  */
@@ -27,5 +29,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Credits")
 	int32 AddCredits(int32 amount);
-	
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SavePlayerState(URSaveGame* SaveObject);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadPlayerState(URSaveGame* SaveObject);
 };

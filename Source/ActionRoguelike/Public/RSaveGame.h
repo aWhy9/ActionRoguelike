@@ -6,6 +6,25 @@
 #include "GameFramework/SaveGame.h"
 #include "RSaveGame.generated.h"
 
+USTRUCT()
+struct FActorSaveData
+{
+	GENERATED_BODY()
+
+public:
+
+	// Identiiier for which actor this belongs to
+	UPROPERTY()
+	FString ActorName;
+
+	// For movable actors, keep location, rotation, scale
+	UPROPERTY()
+	FTransform Transform;
+
+	UPROPERTY()
+	TArray<uint8> ByteData;
+};
+
 /**
  * 
  */
@@ -18,5 +37,8 @@ public:
 
 	UPROPERTY()
 	int32 Credits;
+
+	UPROPERTY()
+	TArray<FActorSaveData> SavedActors;
 	
 };
