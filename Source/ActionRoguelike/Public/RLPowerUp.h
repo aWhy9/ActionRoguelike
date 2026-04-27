@@ -64,7 +64,9 @@ protected:
 	
 public:
 
-	ARLPowerUp();	
+	ARLPowerUp();
+
+	FText GetInteractText_Implementation(APawn* InstigatorPawn);
 
 protected:
 	// Called when the game starts or when spawned

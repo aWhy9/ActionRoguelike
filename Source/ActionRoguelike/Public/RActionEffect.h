@@ -20,6 +20,9 @@ public:
 	
 	void StartAction_Implementation(AActor* Instigator) override;	
 	void StopAction_Implementation(AActor* Instigator) override;
+
+	UFUNCTION(BlueprintCallable)
+	float GetTimeRemaining() const;
 	
 protected:
 

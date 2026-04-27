@@ -3,6 +3,7 @@
 
 #include "RActionEffect.h"
 #include "RActionComponent.h"
+#include "GameFramework/GameStateBase.h"
 
 URActionEffect::URActionEffect()
 {
@@ -49,7 +50,20 @@ void URActionEffect::StopAction_Implementation(AActor* Instigator)
 	}
 }
 
+float URActionEffect::GetTimeRemaining() const
+{
+	AGameStateBase* GS = GetWorld()->GetGameState<AGameStateBase>();
+	if (GS)
+	{
+		float Endtime = TimeStarted + Duration;
+		return Endtime - GS->GetServerWorldTimeSeconds();
+	}
+	return Duration;
+}
+
 void URActionEffect::ExecutePeriodicEffect_Implementation(AActor* Instigator)
 {
 	
 }
+
+

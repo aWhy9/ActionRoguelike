@@ -26,6 +26,7 @@ ARLPowerUp::ARLPowerUp()
 
 }
 
+
 // Called when the game starts or when spawned
 void ARLPowerUp::BeginPlay()
 {
@@ -33,7 +34,6 @@ void ARLPowerUp::BeginPlay()
 
 	
 }
-
 
 
 // Implementation of this actor's interact function from InteractionComponent
@@ -48,6 +48,12 @@ void ARLPowerUp::Interact_Implementation(APawn* InstigatorPawn)
 	
 	//IRGameplayInterface::Interact_Implementation(InstigatorPawn);
 }
+
+FText ARLPowerUp::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	return FText::GetEmpty();
+}
+
 
 // Toggles Actor visibility and collision
 void ARLPowerUp::ToggleActorVisibility()

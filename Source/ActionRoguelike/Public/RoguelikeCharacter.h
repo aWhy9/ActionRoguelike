@@ -13,6 +13,7 @@ class UAnimMontage;
 class URLAttributeComponent;
 class UNiagaraSystem;
 class URActionComponent;
+class URLWorldUserWidget;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -42,6 +43,11 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	FName TimeToHitParamName;
+
+	URLWorldUserWidget* ActiveHealthBar;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
 
 protected:
 	// Called when the game starts or when spawned

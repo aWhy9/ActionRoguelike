@@ -9,10 +9,12 @@
 #include "RLAttributeComponent.h"
 #include "RLMagicProjectile.h"
 #include "RLProjectileBase.h"
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "RLWorldUserWidget.h"
 
 // Sets default values
 ARoguelikeCharacter::ARoguelikeCharacter()
@@ -57,6 +59,17 @@ FVector ARoguelikeCharacter::GetPawnViewLocation() const
 void ARoguelikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Spawn Healthbar when damage is taken
+	if (ActiveHealthBar == nullptr)
+	{			
+		ActiveHealthBar = CreateWidget<URLWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+		if (ActiveHealthBar)
+		{
+			ActiveHealthBar->AttachedActor = this;
+			ActiveHealthBar->AddToViewport();
+		}
+	}
 	
 }
 

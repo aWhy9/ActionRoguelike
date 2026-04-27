@@ -8,6 +8,8 @@
 #include "Kismet/GameplayStatics.h"
 
 
+#define LOCTEXT_NAMESPACE "InteractableActors"
+
 ARLHealthPotion::ARLHealthPotion()
 {
 	
@@ -52,3 +54,15 @@ void ARLHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		
 }
 
+FText ARLHealthPotion::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	URLAttributeComponent* AttributeComp = URLAttributeComponent::GetAttributes(InstigatorPawn);
+	if (AttributeComp && AttributeComp->IsFullHealth())
+	{
+		return LOCTEXT("HealthPotion_FullHealthWarning", "Already at Full Health");
+	}
+
+	return FText::Format( LOCTEXT( "HealthPotion_InteractMessage", "Cost {0} Credits. Restores health to maximum."), CreditCost);
+}
+
+#undef LOCTEXT_NAMESPACE
