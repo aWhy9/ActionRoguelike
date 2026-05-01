@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/DataTable.h"
 #include "RGameModeBase.generated.h"
 
 
@@ -13,6 +14,42 @@ class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
 class URSaveGame;
+class UDataTable;
+class URMonsterData;
+
+/* Datatable Row for spawning monsters in Game mode */
+USTRUCT(BlueprintType)
+struct FMonsterInfoRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	FMonsterInfoRow()
+	{
+		Weight = 1.0f;
+		SpawnCost = 5.0f;
+		KillReward = 20.0f;
+	}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FPrimaryAssetId MonsterId;
+	
+	//TSubclassOf<AActor> MonsterClass;
+
+	// Relative chance to pick this monster
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Weight;
+
+	// Points requires by Gamemode to spawn this unit
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SpawnCost;
+
+	// Amount of credits awarded to killer of this unit
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float KillReward;
+};
+
+
 
 /**
  * 
@@ -28,6 +65,10 @@ protected:
 	
 	UPROPERTY()
 	URSaveGame* CurrentSaveGame;
+
+	// All available monsters
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UDataTable* MonsterTable;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UEnvQuery* SpawnBotQuery; 
@@ -40,8 +81,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float SpawnTimerInterval;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TSubclassOf<AActor> MinionClass;
+	// UPROPERTY(EditDefaultsOnly, Category = "AI")
+	// TSubclassOf<AActor> MinionClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 NrOfAliveBots;
@@ -55,6 +96,9 @@ protected:
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
+	
+	void OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLocation);
+	
 	UFUNCTION()
 	void RespawnPlayerElapsed(AController* Controller);
 	

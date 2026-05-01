@@ -9,6 +9,8 @@
 #include "Net/UnrealNetwork.h"
 
 
+DECLARE_CYCLE_STAT(TEXT("StartActionByName"), STAT_StartActionByName, STATGROUP_STANFORD);
+
 URActionComponent::URActionComponent()
 {
 
@@ -31,6 +33,21 @@ void URActionComponent::BeginPlay()
 			AddAction(GetOwner(), ActionClass);
 		}
 	}	
+}
+
+void URActionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Stop All actions remaining
+	TArray<URAction*> ActionsCopy = Actions;
+	for (URAction* Action: ActionsCopy)
+	{
+		if (Action && Action->IsRunning())
+		{
+			Action->StopAction(GetOwner());
+		}
+	}
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void URActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -89,6 +106,8 @@ void URActionComponent::RemoveAction(URAction* ActionToRemove)
 
 bool URActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 {
+	SCOPE_CYCLE_COUNTER(STAT_StartActionByName);
+	
 	for (URAction* Action : Actions)
 	{
 		if (Action && Action->ActionName == ActionName)
@@ -105,6 +124,8 @@ bool URActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 			{
 				ServerStartAction(Instigator, ActionName);
 			}
+			// Bookmark for Unreal Insights
+			TRACE_BOOKMARK(TEXT("Start Action::%s"), *GetNameSafe(Action));
 			
 			Action->StartAction(Instigator);
 			return true;

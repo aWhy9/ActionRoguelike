@@ -9,10 +9,14 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "DrawDebugHelpers.h"
+#include "RActionComponent.h"
 #include "RGameplayInterface.h"
 #include "RLPlayerState.h"
+#include "RMonsterData.h"
 #include "RoguelikeCharacter.h"
 #include "RSaveGame.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Engine/AssetManager.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
@@ -33,6 +37,12 @@ void ARGameModeBase::InitGame(const FString& MapName, const FString& Options, FS
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
+	FString SelectedSaveSlot = UGameplayStatics::ParseOption(Options, "SaveGame");
+	if (SelectedSaveSlot.Len() > 0)
+	{
+		SlotName = SelectedSaveSlot; 
+	}
+	
 	LoadSaveGame();
 }
 
@@ -114,10 +124,55 @@ void ARGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
 	if (Locations.IsValidIndex(0))
 	{
-		GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
+		if (MonsterTable)
+		{
+			TArray<FMonsterInfoRow*> Rows;
+			MonsterTable->GetAllRows("", Rows);
 
+			// Get Random enemy
+			int32 RandomIndex = FMath::RandRange(0, Rows.Num()-1);
+			FMonsterInfoRow* SelectedRow = Rows[RandomIndex];
+
+			UAssetManager* Manager = UAssetManager::GetIfValid();
+			if (Manager)
+			{
+
+				LogOnScreen(this, "Loading monster...", FColor::Green);
+				
+				TArray<FName> Bundles;
+				FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(this, &ARGameModeBase::OnMonsterLoaded, SelectedRow->MonsterId, Locations[0]);				
+				Manager->LoadPrimaryAsset(SelectedRow->MonsterId, Bundles, Delegate);
+			}			
+		}
 		// Track all the used spawn locations
-		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
+		//DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
+	}
+}
+
+void ARGameModeBase::OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLocation)
+{
+	LogOnScreen(this, "Finished Loading.", FColor::Green);
+	
+	UAssetManager* Manager = UAssetManager::GetIfValid();
+	if (Manager)
+	{
+		URMonsterData* MonsterData = Cast<URMonsterData>(Manager->GetPrimaryAssetObject(LoadedId));
+		
+		AActor* NewBot = GetWorld()->SpawnActor<AActor>(MonsterData->MonsterClass, SpawnLocation, FRotator::ZeroRotator);
+		if (NewBot)
+		{
+			LogOnScreen(this, FString::Printf(TEXT("Spawned enemy: %s (%s)"), *GetNameSafe(NewBot), *GetNameSafe(MonsterData)));
+	
+			// Grant Special Actions, buffs, etc
+			URActionComponent* ActionComp = Cast<URActionComponent>(NewBot->GetComponentByClass(URActionComponent::StaticClass()));
+			if (ActionComp)
+			{
+				for (TSubclassOf<URAction> ActionClass : MonsterData->Actions)
+				{
+					ActionComp->AddAction(NewBot, ActionClass);
+				}
+			}
+		}
 	}
 }
 
